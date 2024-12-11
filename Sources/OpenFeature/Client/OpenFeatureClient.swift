@@ -11,8 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureClient {
+public final class OpenFeatureClient: Sendable {
     private let provider: any OpenFeatureProvider
+    private let hooks = LockedValueBox([any OpenFeatureHook]())
+
+    // MARK: - Evaluation
 
     public func value(
         for flag: String,
@@ -20,7 +23,13 @@ public struct OpenFeatureClient {
         context: OpenFeatureEvaluationContext? = nil,
         options: OpenFeatureEvaluationOptions? = nil
     ) async -> Bool {
-        await provider.resolve(flag, defaultValue: defaultValue, context: context)
+        var context = context ?? OpenFeatureEvaluationContext()
+        hooks.withValue { hooks in
+            for hook in hooks {
+                hook.beforeEvaluation(of: flag, defaultValue: defaultValue, context: &context, hints: [:])
+            }
+        }
+        return await provider.resolve(flag, defaultValue: defaultValue, context: context)
     }
 
     public func evaluation(
@@ -29,11 +38,23 @@ public struct OpenFeatureClient {
         context: OpenFeatureEvaluationContext? = nil,
         options: OpenFeatureEvaluationOptions? = nil
     ) async -> OpenFeatureEvaluation<Bool> {
+        var context = context ?? OpenFeatureEvaluationContext()
+        hooks.withValue { hooks in
+            for hook in hooks {
+                hook.beforeEvaluation(of: flag, defaultValue: defaultValue, context: &context, hints: [:])
+            }
+        }
         let resolution = await provider.resolution(of: flag, defaultValue: defaultValue, context: context)
         return OpenFeatureEvaluation(flag: flag, resolution: resolution)
     }
 
-    init(provider: any OpenFeatureProvider) {
+    // MARK: - Hooks
+
+    public func addHook(_ hook: any OpenFeatureHook) {
+        hooks.withValue { $0.append(hook) }
+    }
+
+    package init(provider: any OpenFeatureProvider) {
         self.provider = provider
     }
 }

@@ -11,12 +11,11 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureEvaluationContext: Sendable {
-    public var targetingKey: String?
-    public var fields: [String: OpenFeatureFieldValue]
-
-    public init(targetingKey: String? = nil, fields: [String: OpenFeatureFieldValue] = [:]) {
-        self.targetingKey = targetingKey
-        self.fields = fields
-    }
+public protocol OpenFeatureHook: Sendable {
+    func beforeEvaluation(
+        of flag: String,
+        defaultValue: Bool,
+        context: inout OpenFeatureEvaluationContext,
+        hints: [String: OpenFeatureFieldValue]
+    )
 }
