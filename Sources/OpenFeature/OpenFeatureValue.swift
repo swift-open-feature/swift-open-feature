@@ -11,19 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceLifecycle
+public protocol OpenFeatureValue: Sendable {}
 
-public protocol OpenFeatureProvider: Service {
-    var metadata: OpenFeatureProviderMetadata { get }
-    var hooks: [any OpenFeatureHook] { get }
-
-    func resolution(
-        of flag: String,
-        defaultValue: Bool,
-        context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool>
-}
-
-extension OpenFeatureProvider {
-    public var hooks: [any OpenFeatureHook] { [] }
-}
+extension Bool: OpenFeatureValue {}
+extension String: OpenFeatureValue {}
+extension Int: OpenFeatureValue {}
+extension Double: OpenFeatureValue {}

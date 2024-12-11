@@ -13,48 +13,139 @@
 
 public actor OpenFeatureClient: Sendable {
     private let provider: () -> any OpenFeatureProvider
-    private let globalEvaluationContext: () -> OpenFeatureEvaluationContext?
     private var evaluationContext: OpenFeatureEvaluationContext?
+    private var hooks: [any OpenFeatureHook]
+    private let globalEvaluationContext: () -> OpenFeatureEvaluationContext?
+    private let globalHooks: () -> [any OpenFeatureHook]
 
     public func value(
         for flag: String,
         defaultingTo defaultValue: Bool,
         context: OpenFeatureEvaluationContext? = nil,
-        options: OpenFeatureEvaluationOptions? = nil
+        hooks: [any OpenFeatureHook] = [],
+        hookHints: [String: OpenFeatureFieldValue] = [:]
     ) async -> Bool {
-        let context = mergedEvaluationContext(invocationContext: context)
-        let resolution = await provider().resolution(of: flag, defaultValue: defaultValue, context: context)
-        return resolution.value
+        await evaluation(
+            of: flag,
+            defaultingTo: defaultValue,
+            context: context,
+            hooks: hooks,
+            hookHints: hookHints
+        ).value
     }
 
     public func evaluation(
         of flag: String,
         defaultingTo defaultValue: Bool,
         context: OpenFeatureEvaluationContext? = nil,
-        options: OpenFeatureEvaluationOptions? = nil
+        hooks: [any OpenFeatureHook] = [],
+        hookHints: [String: OpenFeatureFieldValue] = [:]
     ) async -> OpenFeatureEvaluation<Bool> {
+        let provider = provider()
+        let globalHooks = globalHooks()
         let context = mergedEvaluationContext(invocationContext: context)
-        let resolution = await provider().resolution(of: flag, defaultValue: defaultValue, context: context)
-        return OpenFeatureEvaluation(flag: flag, resolution: resolution)
+        let beforeHooks = mergedBeforeHooks(
+            globalHooks: globalHooks,
+            invocationHooks: hooks,
+            providerHooks: provider.hooks
+        )
+        let afterHooks = mergedAfterHooks(
+            providerHooks: provider.hooks,
+            invocationHooks: hooks,
+            globalHooks: globalHooks
+        )
+        let errorHooks = afterHooks
+        var hookContext = OpenFeatureHookContext(
+            flag: flag,
+            defaultValue: defaultValue,
+            evaluationContext: context,
+            providerMetadata: provider.metadata
+        )
+
+        for hook in beforeHooks {
+            do {
+                try hook.beforeEvaluation(
+                    context: &hookContext,
+                    hints: hookHints
+                )
+            } catch {
+                return failedEvaluation(
+                    error: error,
+                    flag: flag,
+                    defaultValue: defaultValue,
+                    hookContext: hookContext,
+                    hookHints: hookHints,
+                    errorHooks: errorHooks,
+                    afterHooks: afterHooks
+                )
+            }
+        }
+
+        let resolution = await provider.resolution(
+            of: flag,
+            defaultValue: defaultValue,
+            context: hookContext.evaluationContext
+        )
+        let evaluation = OpenFeatureEvaluation(flag: flag, resolution: resolution)
+
+        if let error = resolution.error {
+            for hook in errorHooks {
+                hook.onError(context: hookContext, error: error, hints: hookHints)
+            }
+        } else {
+            for hook in afterHooks {
+                do {
+                    try hook.afterSuccessfulEvaluation(
+                        context: hookContext,
+                        evaluation: evaluation,
+                        hints: hookHints
+                    )
+                } catch {
+                    return failedEvaluation(
+                        error: error,
+                        flag: flag,
+                        defaultValue: defaultValue,
+                        hookContext: hookContext,
+                        hookHints: hookHints,
+                        errorHooks: errorHooks,
+                        afterHooks: afterHooks
+                    )
+                }
+            }
+        }
+
+        for hook in afterHooks {
+            hook.afterEvaluation(context: hookContext, evaluation: evaluation, hints: hookHints)
+        }
+
+        return evaluation
     }
 
     public func setEvaluationContext(_ evaluationContext: OpenFeatureEvaluationContext?) {
         self.evaluationContext = evaluationContext
     }
 
+    public func addHooks(_ hooks: [any OpenFeatureHook]) {
+        self.hooks += hooks
+    }
+
     package init(
         provider: @escaping () -> any OpenFeatureProvider,
+        evaluationContext: OpenFeatureEvaluationContext? = nil,
+        hooks: [any OpenFeatureHook] = [],
         globalEvaluationContext: @escaping () -> OpenFeatureEvaluationContext? = { nil },
-        evaluationContext: OpenFeatureEvaluationContext? = nil
+        globalHooks: @escaping () -> [any OpenFeatureHook] = { [] }
     ) {
         self.evaluationContext = evaluationContext
-        self.globalEvaluationContext = globalEvaluationContext
         self.provider = provider
+        self.hooks = hooks
+        self.globalEvaluationContext = globalEvaluationContext
+        self.globalHooks = globalHooks
     }
 
     private func mergedEvaluationContext(
         invocationContext: OpenFeatureEvaluationContext?
-    ) -> OpenFeatureEvaluationContext? {
+    ) -> OpenFeatureEvaluationContext {
         var context = globalEvaluationContext() ?? OpenFeatureEvaluationContext()
 
         if let taskLocalContext = OpenFeatureEvaluationContext.current {
@@ -70,5 +161,63 @@ public actor OpenFeatureClient: Sendable {
         }
 
         return context
+    }
+
+    private func mergedBeforeHooks(
+        globalHooks: [any OpenFeatureHook],
+        invocationHooks: [any OpenFeatureHook],
+        providerHooks: [any OpenFeatureHook]
+    ) -> [any OpenFeatureHook] {
+        var hooks = globalHooks
+        hooks += self.hooks
+        hooks += invocationHooks
+        hooks += providerHooks
+        return hooks
+    }
+
+    private func mergedAfterHooks(
+        providerHooks: [any OpenFeatureHook],
+        invocationHooks: [any OpenFeatureHook],
+        globalHooks: [any OpenFeatureHook]
+    ) -> [any OpenFeatureHook] {
+        var hooks = providerHooks
+        hooks += invocationHooks
+        hooks += self.hooks
+        hooks += globalHooks
+        return hooks
+    }
+
+    private func failedEvaluation<Value: OpenFeatureValue>(
+        error: any Error,
+        flag: String,
+        defaultValue: Value,
+        hookContext: OpenFeatureHookContext,
+        hookHints: OpenFeatureHookHints,
+        errorHooks: [any OpenFeatureHook],
+        afterHooks: [any OpenFeatureHook]
+    ) -> OpenFeatureEvaluation<Value> {
+        for hook in errorHooks {
+            hook.onError(context: hookContext, error: error, hints: hookHints)
+        }
+
+        let error: OpenFeatureResolutionError = {
+            guard let error = error as? OpenFeatureResolutionError else {
+                return OpenFeatureResolutionError(code: .general, message: "\(error)")
+            }
+            return error
+        }()
+
+        let evaluation = OpenFeatureEvaluation(
+            flag: flag,
+            value: defaultValue,
+            error: error,
+            reason: .error
+        )
+
+        for hook in afterHooks {
+            hook.afterEvaluation(context: hookContext, evaluation: evaluation, hints: hookHints)
+        }
+
+        return evaluation
     }
 }

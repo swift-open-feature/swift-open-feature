@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureEvaluation<Value: Sendable & Equatable>: Sendable, Equatable {
+public struct OpenFeatureEvaluation<Value: OpenFeatureValue>: Sendable {
     public let flag: String
     public let value: Value
     public let error: OpenFeatureResolutionError?
@@ -44,3 +44,5 @@ public struct OpenFeatureEvaluation<Value: Sendable & Equatable>: Sendable, Equa
         self.flagMetadata = resolution.flagMetadata
     }
 }
+
+extension OpenFeatureEvaluation: Equatable where Value: Equatable {}

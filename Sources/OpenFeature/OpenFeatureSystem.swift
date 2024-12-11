@@ -30,12 +30,29 @@ public enum OpenFeatureSystem: Sendable {
         storage.evaluationContext.withLock { $0 = evaluationContext }
     }
 
-    public static func client(evaluationContext: OpenFeatureEvaluationContext? = nil) -> OpenFeatureClient {
+    public static var hooks: [any OpenFeatureHook] {
+        storage.hooks.withLock(\.self)
+    }
+
+    public static func addHooks(_ hooks: [any OpenFeatureHook]) {
+        storage.hooks.withLock { $0 += hooks }
+    }
+
+    public static func client(
+        evaluationContext: OpenFeatureEvaluationContext? = nil,
+        hooks: [any OpenFeatureHook] = []
+    ) -> OpenFeatureClient {
         OpenFeatureClient(
             provider: { provider },
-            globalEvaluationContext: { evaluationContext },
-            evaluationContext: evaluationContext
+            evaluationContext: evaluationContext,
+            hooks: hooks,
+            globalEvaluationContext: { self.evaluationContext },
+            globalHooks: { self.hooks }
         )
+    }
+
+    package static func removeHooks() {
+        storage.hooks.withLock { $0.removeAll() }
     }
 
     private static let storage = Storage.instance
@@ -45,6 +62,7 @@ public enum OpenFeatureSystem: Sendable {
 
         let provider = Mutex<any OpenFeatureProvider>(OpenFeatureNoOpProvider())
         let evaluationContext = Mutex<OpenFeatureEvaluationContext?>(nil)
+        let hooks = Mutex<[any OpenFeatureHook]>([])
 
         private init() {}
     }
