@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureResolution<Value: Sendable>: Sendable {
+public struct OpenFeatureResolution<Value: Sendable & Equatable>: Sendable, Equatable {
     public let value: Value
     public let error: OpenFeatureResolutionError?
     public let reason: OpenFeatureResolutionReason?
@@ -20,10 +20,10 @@ public struct OpenFeatureResolution<Value: Sendable>: Sendable {
 
     public init(
         value: Value,
-        error: OpenFeatureResolutionError?,
-        reason: OpenFeatureResolutionReason?,
-        variant: String?,
-        flagMetadata: [String: OpenFeatureFlagMetadataValue]
+        error: OpenFeatureResolutionError? = nil,
+        reason: OpenFeatureResolutionReason? = nil,
+        variant: String? = nil,
+        flagMetadata: [String: OpenFeatureFlagMetadataValue] = [:]
     ) {
         self.value = value
         self.error = error

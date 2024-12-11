@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public enum OpenFeatureFlagMetadataValue: Sendable {
+public enum OpenFeatureFlagMetadataValue: Sendable, Equatable {
     case bool(Bool)
     case string(String)
     case int(Int)

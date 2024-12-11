@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureResolutionReason: RawRepresentable, Sendable {
+public struct OpenFeatureResolutionReason: RawRepresentable, Sendable, Equatable {
     public static let `default` = OpenFeatureResolutionReason(rawValue: "DEFAULT")
     public static let targetingMatch = OpenFeatureResolutionReason(rawValue: "TARGETING_MATCH")
     public static let split = OpenFeatureResolutionReason(rawValue: "SPLIT")
