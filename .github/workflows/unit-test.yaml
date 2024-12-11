@@ -1,0 +1,30 @@
+name: Unit Test
+on:
+  workflow_call:
+  push:
+    branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-unit-test
+  cancel-in-progress: true
+jobs:
+  unit-test:
+    name: Unit Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        toolchain: [latest]
+    steps:
+      - name: Install Swift
+        uses: vapor/swiftly-action@v0.1
+        with:
+          toolchain: ${{ matrix.toolchain }}
+        env:
+          SWIFTLY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+      - name: Resolve Swift dependencies
+        run: swift package resolve
+      - name: Run Unit Tests
+        run: swift test --parallel --enable-code-coverage
