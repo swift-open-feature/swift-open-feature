@@ -84,3 +84,17 @@ extension ReadWriteLock {
         return try body()
     }
 }
+
+package final class LockedValueBox<Value: Sendable>: @unchecked Sendable {
+    private let lock = ReadWriteLock()
+    private var value: Value
+    package init(_ value: Value) {
+        self.value = value
+    }
+
+    package func withValue<R>(_ work: (inout Value) throws -> R) rethrows -> R {
+        try self.lock.withWriterLock {
+            try work(&self.value)
+        }
+    }
+}
