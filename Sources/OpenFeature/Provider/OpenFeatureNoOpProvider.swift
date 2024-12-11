@@ -11,32 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import OpenFeature
-import Testing
+import ServiceLifecycle
 
-@Suite("OpenFeatureSystem")
-final class OpenFeatureSystemTests {
-    deinit {
-        OpenFeatureSystem.bootstrapInternal(nil)
-    }
-
-    @Test("Returns bootstrapped provider")
-    func bootstrappedProvider() async throws {
-        let providerBeforeBootstrap = OpenFeatureSystem.provider
-
-        #expect(providerBeforeBootstrap is OpenFeatureNoOpProvider)
-
-        OpenFeatureSystem.bootstrapInternal(OpenFeatureProviderA())
-
-        let providerAfterBootstrap = OpenFeatureSystem.provider
-
-        #expect(providerAfterBootstrap is OpenFeatureProviderA)
-    }
-}
-
-// MARK: - Helpers
-
-struct OpenFeatureProviderA: OpenFeatureProvider {
+public struct OpenFeatureNoOpProvider: OpenFeatureProvider {
     private let stream: AsyncStream<Void>
     private let continuation: AsyncStream<Void>.Continuation
 
