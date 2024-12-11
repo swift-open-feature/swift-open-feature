@@ -11,4 +11,4 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureEvaluationOptions {}
+public typealias OpenFeatureHookHints = [String: OpenFeatureFieldValue]

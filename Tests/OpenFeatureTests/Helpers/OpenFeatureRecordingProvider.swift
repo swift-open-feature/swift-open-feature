@@ -16,7 +16,12 @@ import ServiceLifecycle
 
 actor OpenFeatureRecordingProvider: OpenFeatureProvider {
     let metadata = OpenFeatureProviderMetadata(name: "recording")
+    let hooks: [any OpenFeatureHook]
     var boolResolutionRequests = [ResolutionRequest<Bool>]()
+
+    init(hooks: [any OpenFeatureHook] = []) {
+        self.hooks = hooks
+    }
 
     func run() async throws {
         try await gracefulShutdown()

@@ -19,6 +19,8 @@ import Testing
 final class OpenFeatureSystemTests {
     deinit {
         OpenFeatureSystem.setProvider(OpenFeatureNoOpProvider())
+        OpenFeatureSystem.setEvaluationContext(nil)
+        OpenFeatureSystem.removeHooks()
     }
 
     @Test("Returns global provider")
@@ -56,5 +58,25 @@ final class OpenFeatureSystemTests {
         OpenFeatureSystem.setProvider(provider)
 
         #expect(await client.value(for: "key", defaultingTo: false) == true)
+    }
+
+    @Test("Add hooks")
+    func addHooks() async throws {
+        #expect(OpenFeatureSystem.hooks.isEmpty)
+
+        let targetingKey = "I'm hooked! 😍"
+        let hook = OpenFeatureClosureHook(beforeEvaluation: { context, _ in
+            context.evaluationContext.targetingKey = targetingKey
+        })
+        OpenFeatureSystem.addHooks([hook])
+
+        let provider = OpenFeatureRecordingProvider()
+        OpenFeatureSystem.setProvider(provider)
+        let client = OpenFeatureSystem.client()
+        #expect(await client.value(for: "key", defaultingTo: true) == true)
+        #expect(await provider.boolResolutionRequests.count == 1)
+
+        let resolutionRequest = try #require(await provider.boolResolutionRequests.first)
+        #expect(resolutionRequest.context?.targetingKey == targetingKey)
     }
 }
