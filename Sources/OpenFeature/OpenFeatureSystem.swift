@@ -16,6 +16,10 @@ public enum OpenFeatureSystem: Sendable {
         storage.provider
     }
 
+    public static func client() -> OpenFeatureClient {
+        OpenFeatureClient(provider: provider)
+    }
+
     private static let storage = Storage()
 
     public static func bootstrap(_ provider: any OpenFeatureProvider) {
