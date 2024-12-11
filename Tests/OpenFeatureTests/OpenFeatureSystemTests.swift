@@ -47,4 +47,16 @@ struct OpenFeatureProviderA: OpenFeatureProvider {
     public func run() async throws {
         for await _ in stream.cancelOnGracefulShutdown() {}
     }
+
+    func resolve(_ flag: String, defaultValue: Bool, context: OpenFeatureEvaluationContext?) async -> Bool {
+        defaultValue
+    }
+
+    func resolution(
+        of flag: String,
+        defaultValue: Bool,
+        context: OpenFeatureEvaluationContext?
+    ) async -> OpenFeatureResolution<Bool> {
+        OpenFeatureResolution(value: defaultValue, error: nil, reason: nil, variant: nil, flagMetadata: [:])
+    }
 }

@@ -24,4 +24,22 @@ public struct OpenFeatureNoOpProvider: OpenFeatureProvider {
     public func run() async throws {
         for await _ in stream.cancelOnGracefulShutdown() {}
     }
+
+    public func resolve(_ flag: String, defaultValue: Bool, context: OpenFeatureEvaluationContext?) async -> Bool {
+        defaultValue
+    }
+
+    public func resolution(
+        of flag: String,
+        defaultValue: Bool,
+        context: OpenFeatureEvaluationContext?
+    ) async -> OpenFeatureResolution<Bool> {
+        OpenFeatureResolution(
+            value: defaultValue,
+            error: nil,
+            reason: .default,
+            variant: "default",
+            flagMetadata: [:]
+        )
+    }
 }

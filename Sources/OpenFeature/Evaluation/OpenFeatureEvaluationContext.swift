@@ -11,14 +11,12 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceLifecycle
+public struct OpenFeatureEvaluationContext {
+    public var targetingKey: String?
+    public var fields: [String: OpenFeatureFieldValue]
 
-public protocol OpenFeatureProvider: Service {
-    func resolution(
-        of flag: String,
-        defaultValue: Bool,
-        context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool>
-
-    func resolve(_ flag: String, defaultValue: Bool, context: OpenFeatureEvaluationContext?) async -> Bool
+    public init(targetingKey: String? = nil, fields: [String: OpenFeatureFieldValue] = [:]) {
+        self.targetingKey = targetingKey
+        self.fields = fields
+    }
 }

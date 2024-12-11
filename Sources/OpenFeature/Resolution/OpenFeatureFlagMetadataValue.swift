@@ -11,14 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceLifecycle
-
-public protocol OpenFeatureProvider: Service {
-    func resolution(
-        of flag: String,
-        defaultValue: Bool,
-        context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool>
-
-    func resolve(_ flag: String, defaultValue: Bool, context: OpenFeatureEvaluationContext?) async -> Bool
+public enum OpenFeatureFlagMetadataValue: Sendable {
+    case bool(Bool)
+    case string(String)
+    case int(Int)
+    case double(Double)
 }
