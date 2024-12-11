@@ -36,5 +36,7 @@ jobs:
         uses: vapor/swiftly-action@v0.1
         with:
           toolchain: latest
+        env:
+          SWIFTLY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Run format check
         run: ./scripts/check-swift-format.sh

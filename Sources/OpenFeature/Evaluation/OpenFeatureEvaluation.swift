@@ -25,7 +25,7 @@ public struct OpenFeatureEvaluation<Value: Sendable>: Sendable {
         error: OpenFeatureResolutionError?,
         reason: OpenFeatureResolutionReason?,
         variant: String?,
-        flagMetadata: [String : OpenFeatureFlagMetadataValue]
+        flagMetadata: [String: OpenFeatureFlagMetadataValue]
     ) {
         self.flag = flag
         self.value = value
