@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureEvaluation<Value: Sendable>: Sendable {
+public struct OpenFeatureEvaluation<Value: Sendable & Equatable>: Sendable, Equatable {
     public let flag: String
     public let value: Value
     public let error: OpenFeatureResolutionError?

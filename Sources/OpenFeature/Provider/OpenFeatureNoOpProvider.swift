@@ -13,9 +13,11 @@
 
 import ServiceLifecycle
 
-public struct OpenFeatureNoOpProvider: OpenFeatureProvider {
+public struct OpenFeatureNoOpProvider: OpenFeatureProvider, CustomStringConvertible {
+    public let description = "OpenFeatureNoOpProvider"
     private let stream: AsyncStream<Void>
     private let continuation: AsyncStream<Void>.Continuation
+    package static let variant = "default-variant"
 
     public init() {
         (stream, continuation) = AsyncStream.makeStream()
@@ -36,10 +38,8 @@ public struct OpenFeatureNoOpProvider: OpenFeatureProvider {
     ) async -> OpenFeatureResolution<Bool> {
         OpenFeatureResolution(
             value: defaultValue,
-            error: nil,
             reason: .default,
-            variant: "default",
-            flagMetadata: [:]
+            variant: Self.variant
         )
     }
 }

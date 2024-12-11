@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureResolutionError: Error {
+public struct OpenFeatureResolutionError: Error, Equatable {
     public let code: Code
     public let message: String?
 
@@ -20,7 +20,7 @@ public struct OpenFeatureResolutionError: Error {
         self.message = message
     }
 
-    public struct Code: RawRepresentable, Sendable {
+    public struct Code: RawRepresentable, Sendable, Equatable {
         public static let providerNotReady = Code(rawValue: "PROVIDER_NOT_READY")
         public static let fatal = Code(rawValue: "PROVIDER_FATAL")
         public static let flagNotFound = Code(rawValue: "FLAG_NOT_FOUND")
