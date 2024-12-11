@@ -11,14 +11,4 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceLifecycle
-
-public protocol OpenFeatureProvider: Service {
-    func resolution(
-        of flag: String,
-        defaultValue: Bool,
-        context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool>
-
-    func resolve(_ flag: String, defaultValue: Bool, context: OpenFeatureEvaluationContext?) async -> Bool
-}
+public struct OpenFeatureEvaluationOptions {}

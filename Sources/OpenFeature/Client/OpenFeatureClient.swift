@@ -14,6 +14,25 @@
 public struct OpenFeatureClient {
     private let provider: any OpenFeatureProvider
 
+    public func value(
+        for flag: String,
+        defaultingTo defaultValue: Bool,
+        context: OpenFeatureEvaluationContext? = nil,
+        options: OpenFeatureEvaluationOptions? = nil
+    ) async -> Bool {
+        await provider.resolve(flag, defaultValue: defaultValue, context: context)
+    }
+
+    public func evaluation(
+        of flag: String,
+        defaultingTo defaultValue: Bool,
+        context: OpenFeatureEvaluationContext? = nil,
+        options: OpenFeatureEvaluationOptions? = nil
+    ) async -> OpenFeatureEvaluation<Bool> {
+        let resolution = await provider.resolution(of: flag, defaultValue: defaultValue, context: context)
+        return OpenFeatureEvaluation(flag: flag, resolution: resolution)
+    }
+
     init(provider: any OpenFeatureProvider) {
         self.provider = provider
     }
