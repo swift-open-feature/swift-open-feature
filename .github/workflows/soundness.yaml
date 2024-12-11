@@ -1,0 +1,40 @@
+name: Soundness
+on:
+  workflow_call:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-soundness
+  cancel-in-progress: true
+jobs:
+  unacceptable-language-check:
+    name: Unacceptable language check
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run unacceptable language check
+        run: ./scripts/check-unacceptable-language.sh
+
+  license-header-check:
+    name: License headers check
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Run license header check
+        run: ./scripts/check-license-headers.sh
+
+  format-check:
+    name: Format check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install Swift
+        uses: vapor/swiftly-action@v0.1
+        with:
+          toolchain: 6.0
+      - name: Run format check
+        run: ./scripts/check-swift-format.sh

@@ -1,0 +1,48 @@
+//===----------------------------------------------------------------------===//
+//
+// This source file is part of the Swift OpenFeature open source project
+//
+// Copyright (c) 2024 the Swift OpenFeature project authors
+// Licensed under Apache License v2.0
+//
+// See LICENSE.txt for license information
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+//===----------------------------------------------------------------------===//
+
+                       The Swift OpenFeature Project
+                       ======================
+
+Please visit the Swift OpenFeature web site for more information:
+
+  * https://github.com/swift-open-feature/swift-open-feature
+
+Copyright 2024 The Swift OpenFeature Project
+
+The Swift OpenFeature Project licenses this file to you under the Apache
+License, version 2.0 (the "License"); you may not use this file except in
+compliance with the License. You may obtain a copy of the License at:
+
+  https://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations
+under the License.
+
+Also, please refer to each LICENSE.txt file, which is located in
+the 'license' directory of the distribution file, for the license terms of the
+components that this product depends on.
+
+-------------------------------------------------------------------------------
+
+This product contains derivations of various scripts and templates from Swift.
+
+  * LICENSE (Apache License 2.0):
+    * https://www.apache.org/licenses/LICENSE-2.0
+  * HOMEPAGE:
+    * https://github.com/swiftlang/github-workflows
+
+---

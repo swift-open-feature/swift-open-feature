@@ -1,0 +1,7 @@
+.gitignore
+.licenseignore
+.swift-format
+.editorconfig
+*.md
+*.txt
+Package.swift
