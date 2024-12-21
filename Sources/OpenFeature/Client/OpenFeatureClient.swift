@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureClient {
+public struct OpenFeatureClient: Sendable {
     private let provider: any OpenFeatureProvider
 
     public func value(
