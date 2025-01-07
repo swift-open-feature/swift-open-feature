@@ -20,7 +20,8 @@ public struct OpenFeatureClient: Sendable {
         context: OpenFeatureEvaluationContext? = nil,
         options: OpenFeatureEvaluationOptions? = nil
     ) async -> Bool {
-        await provider.resolve(flag, defaultValue: defaultValue, context: context)
+        let resolution = await provider.resolution(of: flag, defaultValue: defaultValue, context: context)
+        return resolution.value
     }
 
     public func evaluation(

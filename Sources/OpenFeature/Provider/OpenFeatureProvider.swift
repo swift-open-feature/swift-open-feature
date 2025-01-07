@@ -19,6 +19,4 @@ public protocol OpenFeatureProvider: Service {
         defaultValue: Bool,
         context: OpenFeatureEvaluationContext?
     ) async -> OpenFeatureResolution<Bool>
-
-    func resolve(_ flag: String, defaultValue: Bool, context: OpenFeatureEvaluationContext?) async -> Bool
 }
