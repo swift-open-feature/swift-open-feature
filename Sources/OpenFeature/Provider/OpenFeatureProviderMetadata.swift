@@ -11,14 +11,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceLifecycle
+public struct OpenFeatureProviderMetadata: Hashable, Sendable {
+    public let name: String
+    private var values: [String: String]
 
-public protocol OpenFeatureProvider: Service {
-    var metadata: OpenFeatureProviderMetadata { get }
+    public init(name: String, values: [String: String] = [:]) {
+        self.name = name
+        self.values = values
+    }
 
-    func resolution(
-        of flag: String,
-        defaultValue: Bool,
-        context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool>
+    public subscript(key: String) -> String? {
+        get {
+            values[key]
+        }
+        set {
+            values[key] = newValue
+        }
+    }
 }

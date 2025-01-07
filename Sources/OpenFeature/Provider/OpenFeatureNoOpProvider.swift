@@ -15,20 +15,13 @@ import ServiceLifecycle
 
 public struct OpenFeatureNoOpProvider: OpenFeatureProvider, CustomStringConvertible {
     public let description = "OpenFeatureNoOpProvider"
-    private let stream: AsyncStream<Void>
-    private let continuation: AsyncStream<Void>.Continuation
-    package static let variant = "default-variant"
+    public let metadata = OpenFeatureProviderMetadata(name: "No-op Provider")
+    package static let noOpReason = OpenFeatureResolutionReason(rawValue: "No-op")
 
-    public init() {
-        (stream, continuation) = AsyncStream.makeStream()
-    }
+    public init() {}
 
     public func run() async throws {
-        for await _ in stream.cancelOnGracefulShutdown() {}
-    }
-
-    public func resolve(_ flag: String, defaultValue: Bool, context: OpenFeatureEvaluationContext?) async -> Bool {
-        defaultValue
+        try await gracefulShutdown()
     }
 
     public func resolution(
@@ -36,10 +29,6 @@ public struct OpenFeatureNoOpProvider: OpenFeatureProvider, CustomStringConverti
         defaultValue: Bool,
         context: OpenFeatureEvaluationContext?
     ) async -> OpenFeatureResolution<Bool> {
-        OpenFeatureResolution(
-            value: defaultValue,
-            reason: .default,
-            variant: Self.variant
-        )
+        OpenFeatureResolution(value: defaultValue, reason: Self.noOpReason)
     }
 }
