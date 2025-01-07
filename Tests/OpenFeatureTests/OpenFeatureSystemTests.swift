@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import OpenFeature
+import ServiceLifecycle
 import Testing
 
 @Suite("OpenFeatureSystem")
@@ -26,30 +27,21 @@ final class OpenFeatureSystemTests {
 
         #expect(providerBeforeBootstrap is OpenFeatureNoOpProvider)
 
-        OpenFeatureSystem.bootstrapInternal(OpenFeatureProviderA())
+        OpenFeatureSystem.bootstrapInternal(OpenFeatureProviderStub())
 
         let providerAfterBootstrap = OpenFeatureSystem.provider
 
-        #expect(providerAfterBootstrap is OpenFeatureProviderA)
+        #expect(providerAfterBootstrap is OpenFeatureProviderStub)
     }
 }
 
 // MARK: - Helpers
 
-struct OpenFeatureProviderA: OpenFeatureProvider {
-    private let stream: AsyncStream<Void>
-    private let continuation: AsyncStream<Void>.Continuation
+struct OpenFeatureProviderStub: OpenFeatureProvider {
+    let metadata = OpenFeatureProviderMetadata(name: "stub")
 
-    public init() {
-        (stream, continuation) = AsyncStream.makeStream()
-    }
-
-    public func run() async throws {
-        for await _ in stream.cancelOnGracefulShutdown() {}
-    }
-
-    func resolve(_ flag: String, defaultValue: Bool, context: OpenFeatureEvaluationContext?) async -> Bool {
-        defaultValue
+    func run() async throws {
+        try await gracefulShutdown()
     }
 
     func resolution(
@@ -57,6 +49,6 @@ struct OpenFeatureProviderA: OpenFeatureProvider {
         defaultValue: Bool,
         context: OpenFeatureEvaluationContext?
     ) async -> OpenFeatureResolution<Bool> {
-        OpenFeatureResolution(value: defaultValue, error: nil, reason: nil, variant: nil, flagMetadata: [:])
+        OpenFeatureResolution(value: defaultValue)
     }
 }

@@ -71,11 +71,6 @@ struct OpenFeatureNoOpProviderTests {
 
         @Test("Bool uses default", arguments: [true, false])
         func bool(_ value: Bool) async {
-            #expect(await provider.resolve("flag", defaultValue: value, context: nil) == value)
-        }
-
-        @Test("Bool resolution uses default", arguments: [true, false])
-        func boolResolution(_ value: Bool) async {
             let resolution = await provider.resolution(of: "flag", defaultValue: value, context: nil)
 
             #expect(resolution == .fromNoOpProvider(value: value))
@@ -87,8 +82,7 @@ extension OpenFeatureResolution {
     fileprivate static func fromNoOpProvider(value: Value) -> OpenFeatureResolution {
         OpenFeatureResolution(
             value: value,
-            reason: .default,
-            variant: OpenFeatureNoOpProvider.variant
+            reason: OpenFeatureNoOpProvider.noOpReason
         )
     }
 }

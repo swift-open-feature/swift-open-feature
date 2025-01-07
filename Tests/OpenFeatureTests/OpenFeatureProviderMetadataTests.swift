@@ -11,14 +11,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-import ServiceLifecycle
+import OpenFeature
+import Testing
 
-public protocol OpenFeatureProvider: Service {
-    var metadata: OpenFeatureProviderMetadata { get }
+@Suite("OpenFeatureProviderMetadata")
+struct OpenFeatureProviderMetadataTests {
+    @Test("subscript")
+    func subscript_access() {
+        var metadata = OpenFeatureProviderMetadata(name: "test-provider", values: [:])
 
-    func resolution(
-        of flag: String,
-        defaultValue: Bool,
-        context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool>
+        metadata["foo"] = "bar"
+
+        #expect(metadata["foo"] == "bar")
+    }
 }
