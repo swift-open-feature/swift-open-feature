@@ -31,16 +31,11 @@ error() { printf -- "** ERROR: %s\n" "$*" >&2; }
 fatal() { error "$@"; exit 1; }
 
 UNACCEPTABLE_WORD_LIST="blacklist whitelist slave master sane sanity insane insanity kill killed killing hang hung hanged hanging"
+CURRENT_SCRIPT_PATH="$(realpath "$0")"
 
-unacceptable_language_lines=
-if [[ -f .unacceptablelanguageignore ]]; then
-    log "Found for unacceptable file..."
-    log "Checking for unacceptable language..."
-    unacceptable_language_lines=$(tr '\n' '\0' < .unacceptablelanguageignore | xargs -0 -I% printf '":(exclude)%" '| xargs git grep -i -I -w -H -n --column -E "${UNACCEPTABLE_WORD_LIST// /|}" | grep -v "ignore-unacceptable-language") || true | /usr/bin/paste -s -d " " -
-else
-    log "Checking for unacceptable language..."
-    unacceptable_language_lines=$(git grep -i -I -w -H -n --column -E "${UNACCEPTABLE_WORD_LIST// /|}" | grep -v "ignore-unacceptable-language") || true | /usr/bin/paste -s -d " " -
-fi
+log "Checking for unacceptable language..."
+
+unacceptable_language_lines=$(git grep -i -I -w -H -n --column -E "${UNACCEPTABLE_WORD_LIST// /|}" ":(exclude)$CURRENT_SCRIPT_PATH" | grep -v "ignore-unacceptable-language") || true | /usr/bin/paste -s -d " " -
 
 if [ -n "${unacceptable_language_lines}" ]; then
     fatal " ❌ Found unacceptable language:
