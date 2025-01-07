@@ -7,7 +7,7 @@ concurrency:
 jobs:
   unacceptable-language-check:
     name: Unacceptable language check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
       - name: Checkout repository
@@ -17,7 +17,7 @@ jobs:
 
   license-header-check:
     name: License headers check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 1
     steps:
       - name: Checkout repository
@@ -27,7 +27,7 @@ jobs:
 
   format-check:
     name: Format check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
     steps:
       - name: Checkout repository
