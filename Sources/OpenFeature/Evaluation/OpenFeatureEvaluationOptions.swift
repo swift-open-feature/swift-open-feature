@@ -11,4 +11,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureEvaluationOptions {}
+public struct OpenFeatureEvaluationOptions {
+    public init() {}
+}
