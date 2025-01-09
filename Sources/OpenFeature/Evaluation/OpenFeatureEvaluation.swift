@@ -22,10 +22,10 @@ public struct OpenFeatureEvaluation<Value: Sendable & Equatable>: Sendable, Equa
     package init(
         flag: String,
         value: Value,
-        error: OpenFeatureResolutionError?,
-        reason: OpenFeatureResolutionReason?,
-        variant: String?,
-        flagMetadata: [String: OpenFeatureFlagMetadataValue]
+        error: OpenFeatureResolutionError? = nil,
+        reason: OpenFeatureResolutionReason? = nil,
+        variant: String? = nil,
+        flagMetadata: [String: OpenFeatureFlagMetadataValue] = [:]
     ) {
         self.flag = flag
         self.value = value

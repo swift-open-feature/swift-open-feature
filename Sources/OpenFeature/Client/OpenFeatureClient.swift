@@ -12,7 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 public struct OpenFeatureClient: Sendable {
-    private let provider: any OpenFeatureProvider
+    package let provider: any OpenFeatureProvider
 
     public func value(
         for flag: String,
@@ -34,7 +34,7 @@ public struct OpenFeatureClient: Sendable {
         return OpenFeatureEvaluation(flag: flag, resolution: resolution)
     }
 
-    init(provider: any OpenFeatureProvider) {
+    package init(provider: any OpenFeatureProvider) {
         self.provider = provider
     }
 }

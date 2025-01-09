@@ -27,28 +27,20 @@ final class OpenFeatureSystemTests {
 
         #expect(providerBeforeBootstrap is OpenFeatureNoOpProvider)
 
-        OpenFeatureSystem.bootstrapInternal(OpenFeatureProviderStub())
+        OpenFeatureSystem.bootstrapInternal(OpenFeatureDefaultValueProvider())
 
         let providerAfterBootstrap = OpenFeatureSystem.provider
 
-        #expect(providerAfterBootstrap is OpenFeatureProviderStub)
-    }
-}
-
-// MARK: - Helpers
-
-struct OpenFeatureProviderStub: OpenFeatureProvider {
-    let metadata = OpenFeatureProviderMetadata(name: "stub")
-
-    func run() async throws {
-        try await gracefulShutdown()
+        #expect(providerAfterBootstrap is OpenFeatureDefaultValueProvider)
     }
 
-    func resolution(
-        of flag: String,
-        defaultValue: Bool,
-        context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool> {
-        OpenFeatureResolution(value: defaultValue)
+    @Test("Client uses bootstrapped provider")
+    func clientUsesBootstrappedProvider() async throws {
+        let provider = OpenFeatureDefaultValueProvider()
+        OpenFeatureSystem.bootstrapInternal(provider)
+
+        let client = OpenFeatureSystem.client()
+
+        #expect(client.provider.metadata.name == provider.metadata.name)
     }
 }
