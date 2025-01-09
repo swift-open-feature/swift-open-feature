@@ -12,3 +12,4 @@ jobs:
   unit_test:
     name: Unit Test
     uses: ./.github/workflows/unit-test.yaml
+    secrets: inherit

@@ -28,3 +28,17 @@ jobs:
         run: swift package resolve
       - name: Run Unit Tests
         run: swift test --parallel --enable-code-coverage
+      - name: Merge code coverage
+        run: |
+          llvm-cov export -format "lcov" \
+            .build/debug/swift-open-featurePackageTests.xctest \
+            -ignore-filename-regex="\/Tests\/" \
+            -ignore-filename-regex="\/.build\/" \
+            -instr-profile=./.build/debug/codecov/default.profdata \
+          > info.lcov
+      - name: Upload code coverage report to Codecov
+        uses: codecov/codecov-action@v5.1.2
+        with:
+          files: ./info.lcov
+          fail_ci_if_error: true
+          token: "${{ secrets.CODECOV_TOKEN }}"
