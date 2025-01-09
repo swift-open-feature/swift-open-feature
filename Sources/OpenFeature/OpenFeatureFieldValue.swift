@@ -13,11 +13,35 @@
 
 import Foundation
 
-public enum OpenFeatureFieldValue {
+public enum OpenFeatureFieldValue: Sendable {
     case bool(Bool)
     case string(String)
     case int(Int)
     case double(Double)
     case date(Date)
     case object(any Codable & Sendable)
+}
+
+extension OpenFeatureFieldValue: ExpressibleByBooleanLiteral {
+    public init(booleanLiteral value: BooleanLiteralType) {
+        self = .bool(value)
+    }
+}
+
+extension OpenFeatureFieldValue: ExpressibleByStringLiteral {
+    public init(stringLiteral value: String) {
+        self = .string(value)
+    }
+}
+
+extension OpenFeatureFieldValue: ExpressibleByIntegerLiteral {
+    public init(integerLiteral value: Int) {
+        self = .int(value)
+    }
+}
+
+extension OpenFeatureFieldValue: ExpressibleByFloatLiteral {
+    public init(floatLiteral value: Double) {
+        self = .double(value)
+    }
 }

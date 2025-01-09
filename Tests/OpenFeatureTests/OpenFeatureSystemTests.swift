@@ -15,32 +15,46 @@ import OpenFeature
 import ServiceLifecycle
 import Testing
 
-@Suite("OpenFeatureSystem")
+@Suite("OpenFeatureSystem", .serialized)
 final class OpenFeatureSystemTests {
     deinit {
-        OpenFeatureSystem.bootstrapInternal(nil)
+        OpenFeatureSystem.setProvider(OpenFeatureNoOpProvider())
     }
 
-    @Test("Returns bootstrapped provider")
-    func bootstrappedProvider() async throws {
+    @Test("Returns global provider")
+    func globalProvider() async throws {
         let providerBeforeBootstrap = OpenFeatureSystem.provider
 
         #expect(providerBeforeBootstrap is OpenFeatureNoOpProvider)
 
-        OpenFeatureSystem.bootstrapInternal(OpenFeatureDefaultValueProvider())
+        OpenFeatureSystem.setProvider(OpenFeatureDefaultValueProvider())
 
         let providerAfterBootstrap = OpenFeatureSystem.provider
 
         #expect(providerAfterBootstrap is OpenFeatureDefaultValueProvider)
     }
 
-    @Test("Client uses bootstrapped provider")
-    func clientUsesBootstrappedProvider() async throws {
-        let provider = OpenFeatureDefaultValueProvider()
-        OpenFeatureSystem.bootstrapInternal(provider)
+    @Test("Update evaluation context")
+    func updateEvaluationContext() async throws {
+        #expect(OpenFeatureSystem.evaluationContext == nil)
 
+        let context = OpenFeatureEvaluationContext(targetingKey: "global", fields: ["global": 42])
+        OpenFeatureSystem.setEvaluationContext(context)
+
+        #expect(OpenFeatureSystem.evaluationContext?.targetingKey == "global")
+        #expect(OpenFeatureSystem.evaluationContext?.fields["global"]?.intValue == 42)
+    }
+
+    @Test("Client uses global provider")
+    func clientWithGlobalProvider() async throws {
         let client = OpenFeatureSystem.client()
 
-        #expect(client.provider.metadata.name == provider.metadata.name)
+        // the default provider (no-op) always returns the given default value
+        #expect(await client.value(for: "key", defaultingTo: false) == false)
+
+        let provider = OpenFeatureStaticProvider(boolResolution: OpenFeatureResolution(value: true))
+        OpenFeatureSystem.setProvider(provider)
+
+        #expect(await client.value(for: "key", defaultingTo: false) == true)
     }
 }
