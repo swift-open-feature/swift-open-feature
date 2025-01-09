@@ -36,11 +36,9 @@ jobs:
             -ignore-filename-regex="\/.build\/" \
             -instr-profile=./.build/debug/codecov/default.profdata \
           > info.lcov
-      - name: Debug
-        run: echo "${{ secrets.CODECOV_TOKEN }}"
       - name: Upload code coverage report to Codecov
         uses: codecov/codecov-action@v5.1.2
         with:
           files: ./info.lcov
-          fail_ci_if_error: false
+          fail_ci_if_error: true
           token: "${{ secrets.CODECOV_TOKEN }}"
