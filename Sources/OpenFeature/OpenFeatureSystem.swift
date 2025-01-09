@@ -11,47 +11,41 @@
 //
 //===----------------------------------------------------------------------===//
 
+import Synchronization
+
 public enum OpenFeatureSystem: Sendable {
     public static var provider: any OpenFeatureProvider {
-        storage.provider
+        storage.provider.withLock(\.self)
     }
 
-    public static func client() -> OpenFeatureClient {
-        OpenFeatureClient(provider: provider)
+    public static func setProvider(_ provider: some OpenFeatureProvider) {
+        storage.provider.withLock { $0 = provider }
     }
 
-    private static let storage = Storage()
-
-    public static func bootstrap(_ provider: any OpenFeatureProvider) {
-        storage.bootstrap(provider)
+    public static var evaluationContext: OpenFeatureEvaluationContext? {
+        storage.evaluationContext.withLock(\.self)
     }
 
-    package static func bootstrapInternal(_ provider: (any OpenFeatureProvider)?) {
-        storage.bootstrapInternal(provider)
+    public static func setEvaluationContext(_ evaluationContext: OpenFeatureEvaluationContext?) {
+        storage.evaluationContext.withLock { $0 = evaluationContext }
     }
 
-    private final class Storage: @unchecked Sendable {
-        private var _provider: any OpenFeatureProvider = OpenFeatureNoOpProvider()
-        private var _isInitialized = false
-        private let lock = ReadWriteLock()
+    public static func client(evaluationContext: OpenFeatureEvaluationContext? = nil) -> OpenFeatureClient {
+        OpenFeatureClient(
+            provider: { provider },
+            globalEvaluationContext: { evaluationContext },
+            evaluationContext: evaluationContext
+        )
+    }
 
-        func bootstrap(_ provider: any OpenFeatureProvider) {
-            lock.withWriterLock {
-                precondition(!_isInitialized, "OpenFeatureSystem can only be initialized once per process.")
-                _provider = provider
-                _isInitialized = true
-            }
-        }
+    private static let storage = Storage.instance
 
-        func bootstrapInternal(_ provider: (any OpenFeatureProvider)?) {
-            lock.withWriterLock {
-                _provider = provider ?? OpenFeatureNoOpProvider()
-                _isInitialized = true
-            }
-        }
+    final class Storage: Sendable {
+        static let instance = Storage()
 
-        var provider: any OpenFeatureProvider {
-            lock.withReaderLock { _provider }
-        }
+        let provider = Mutex<any OpenFeatureProvider>(OpenFeatureNoOpProvider())
+        let evaluationContext = Mutex<OpenFeatureEvaluationContext?>(nil)
+
+        private init() {}
     }
 }

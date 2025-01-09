@@ -11,8 +11,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureClient: Sendable {
-    package let provider: any OpenFeatureProvider
+public actor OpenFeatureClient: Sendable {
+    private let provider: () -> any OpenFeatureProvider
+    private let globalEvaluationContext: () -> OpenFeatureEvaluationContext?
+    private var evaluationContext: OpenFeatureEvaluationContext?
 
     public func value(
         for flag: String,
@@ -20,7 +22,8 @@ public struct OpenFeatureClient: Sendable {
         context: OpenFeatureEvaluationContext? = nil,
         options: OpenFeatureEvaluationOptions? = nil
     ) async -> Bool {
-        let resolution = await provider.resolution(of: flag, defaultValue: defaultValue, context: context)
+        let context = mergedEvaluationContext(invocationContext: context)
+        let resolution = await provider().resolution(of: flag, defaultValue: defaultValue, context: context)
         return resolution.value
     }
 
@@ -30,11 +33,42 @@ public struct OpenFeatureClient: Sendable {
         context: OpenFeatureEvaluationContext? = nil,
         options: OpenFeatureEvaluationOptions? = nil
     ) async -> OpenFeatureEvaluation<Bool> {
-        let resolution = await provider.resolution(of: flag, defaultValue: defaultValue, context: context)
+        let context = mergedEvaluationContext(invocationContext: context)
+        let resolution = await provider().resolution(of: flag, defaultValue: defaultValue, context: context)
         return OpenFeatureEvaluation(flag: flag, resolution: resolution)
     }
 
-    package init(provider: any OpenFeatureProvider) {
+    public func setEvaluationContext(_ evaluationContext: OpenFeatureEvaluationContext?) {
+        self.evaluationContext = evaluationContext
+    }
+
+    package init(
+        provider: @escaping () -> any OpenFeatureProvider,
+        globalEvaluationContext: @escaping () -> OpenFeatureEvaluationContext? = { nil },
+        evaluationContext: OpenFeatureEvaluationContext? = nil
+    ) {
+        self.evaluationContext = evaluationContext
+        self.globalEvaluationContext = globalEvaluationContext
         self.provider = provider
+    }
+
+    private func mergedEvaluationContext(
+        invocationContext: OpenFeatureEvaluationContext?
+    ) -> OpenFeatureEvaluationContext? {
+        var context = globalEvaluationContext() ?? OpenFeatureEvaluationContext()
+
+        if let taskLocalContext = OpenFeatureEvaluationContext.current {
+            context.merge(taskLocalContext)
+        }
+
+        if let clientContext = self.evaluationContext {
+            context.merge(clientContext)
+        }
+
+        if let invocationContext {
+            context.merge(invocationContext)
+        }
+
+        return context
     }
 }

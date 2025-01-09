@@ -11,12 +11,17 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureEvaluationContext {
+public struct OpenFeatureEvaluationContext: Sendable {
     public var targetingKey: String?
     public var fields: [String: OpenFeatureFieldValue]
 
     public init(targetingKey: String? = nil, fields: [String: OpenFeatureFieldValue] = [:]) {
         self.targetingKey = targetingKey
         self.fields = fields
+    }
+
+    public mutating func merge(_ other: OpenFeatureEvaluationContext) {
+        targetingKey = other.targetingKey ?? targetingKey
+        fields.merge(other.fields, uniquingKeysWith: { $1 })
     }
 }

@@ -11,4 +11,6 @@
 //
 //===----------------------------------------------------------------------===//
 
-public struct OpenFeatureEvaluationOptions {}
+extension OpenFeatureEvaluationContext {
+    @TaskLocal public static var current: OpenFeatureEvaluationContext?
+}
