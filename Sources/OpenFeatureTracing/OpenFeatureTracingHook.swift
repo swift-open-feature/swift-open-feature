@@ -71,7 +71,7 @@ public struct OpenFeatureTracingHook: OpenFeatureHook {
 
         var eventAttributes: SpanAttributes = [
             "feature_flag.key": "\(context.flag)",
-            "error.type": "\(errorType)"
+            "error.type": "\(errorType)",
         ]
 
         if let providerMetadata = context.providerMetadata {
