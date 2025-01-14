@@ -50,8 +50,16 @@ public struct OpenFeatureTracingHook: OpenFeatureHook {
             let span = InstrumentationSystem.tracer.activeSpan(identifiedBy: serviceContext)
         else { return }
 
+        let errorType: String
+        if let error = error as? OpenFeatureResolutionError {
+            errorType = error.code.rawValue.lowercased()
+        } else {
+            errorType = "general"
+        }
+
         var eventAttributes: SpanAttributes = [
-            "feature_flag.key": "\(context.flag)"
+            "feature_flag.key": "\(context.flag)",
+            "error.type": "\(errorType)"
         ]
 
         if let providerMetadata = context.providerMetadata {
