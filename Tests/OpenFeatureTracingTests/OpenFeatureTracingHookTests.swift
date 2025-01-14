@@ -102,7 +102,7 @@ final class OpenFeatureTracingHookTests {
     func withTargetingKeyWhenConfigured() async throws {
         let span = try await span(
             evaluating: OpenFeatureResolution(value: true),
-            hook: OpenFeatureTracingHook(recordTargetingKey: true),
+            hooks: [OpenFeatureTracingHook(recordTargetingKey: true)],
             evaluationContext: OpenFeatureEvaluationContext(targetingKey: "public")
         )
         let event = try #require(span.events.first)
@@ -134,7 +134,10 @@ final class OpenFeatureTracingHookTests {
     @Test("Records error")
     func recordsError() async throws {
         let resolutionError = OpenFeatureResolutionError(code: .flagNotFound, message: #"Flag "flag" not found."#)
-        let span = try await span(evaluating: OpenFeatureResolution(value: true, error: resolutionError))
+        let span = try await span(
+            evaluating: OpenFeatureResolution(value: true, error: resolutionError),
+            evaluationContext: OpenFeatureEvaluationContext(targetingKey: "secret")
+        )
         let (error, attributes) = try #require(span.errors.first)
 
         #expect(error as? OpenFeatureResolutionError == resolutionError)
@@ -149,12 +152,57 @@ final class OpenFeatureTracingHookTests {
         #expect(span.status == nil)
     }
 
+    @Test("Records non-resolution error")
+    func recordsNonResolutionError() async throws {
+        struct TestError: Error {}
+        let errorHook = OpenFeatureClosureHook { _, _ in throw TestError() }
+        let span = try await span(
+            evaluating: OpenFeatureResolution(value: true),
+            hooks: [errorHook, OpenFeatureTracingHook()],
+            evaluationContext: OpenFeatureEvaluationContext(targetingKey: "secret")
+        )
+        let (error, attributes) = try #require(span.errors.first)
+
+        #expect(error is TestError)
+        #expect(
+            attributes == [
+                "feature_flag.key": "flag",
+                "feature_flag.provider_name": "static",
+                "error.type": "general",
+            ]
+        )
+        #expect(span.status == nil)
+    }
+
+    @Test("Records error with targeting key if configured")
+    func recordsErrorWithTargetingKey() async throws {
+        let resolutionError = OpenFeatureResolutionError(code: .flagNotFound, message: #"Flag "flag" not found."#)
+        let span = try await span(
+            evaluating: OpenFeatureResolution(value: true, error: resolutionError),
+            hooks: [OpenFeatureTracingHook(recordTargetingKey: true)],
+            evaluationContext: OpenFeatureEvaluationContext(targetingKey: "public")
+        )
+        let (error, attributes) = try #require(span.errors.first)
+
+        #expect(error as? OpenFeatureResolutionError == resolutionError)
+        #expect(
+            attributes == [
+                "feature_flag.key": "flag",
+                "feature_flag.provider_name": "static",
+                "error.type": "flag_not_found",
+                "feature_flag.evaluation.error.message": #"Flag "flag" not found."#,
+                "feature_flag.context.id": "public"
+            ]
+        )
+        #expect(span.status == nil)
+    }
+
     @Test("Sets span status on error")
     func setsSpanStatusOnError() async throws {
         let resolutionError = OpenFeatureResolutionError(code: .flagNotFound, message: #"Flag "flag" not found."#)
         let span = try await span(
             evaluating: OpenFeatureResolution(value: true, error: resolutionError),
-            hook: OpenFeatureTracingHook(setSpanStatusOnError: true)
+            hooks: [OpenFeatureTracingHook(setSpanStatusOnError: true)]
         )
         let (error, attributes) = try #require(span.errors.first)
 
@@ -172,12 +220,12 @@ final class OpenFeatureTracingHookTests {
 
     private func span(
         evaluating resolution: OpenFeatureResolution<Bool>,
-        hook: OpenFeatureTracingHook = OpenFeatureTracingHook(),
+        hooks: [any OpenFeatureHook] = [OpenFeatureTracingHook()],
         evaluationContext: OpenFeatureEvaluationContext? = nil
     ) async throws -> SingleSpanTracer.Span {
         let tracer = SingleSpanTracer()
         InstrumentationSystem.bootstrapInternal(tracer)
-        let provider = OpenFeatureStaticProvider(boolResolution: resolution, hooks: [hook])
+        let provider = OpenFeatureStaticProvider(boolResolution: resolution, hooks: hooks)
         let client = OpenFeatureClient(provider: { provider })
 
         await withSpan("test") { _ in
