@@ -33,6 +33,7 @@ jobs:
           llvm-cov export -format "lcov" \
             .build/debug/swift-open-featurePackageTests.xctest \
             -ignore-filename-regex="\/Tests\/" \
+            -ignore-filename-regex="\/OpenFeatureTestSupport\/" \
             -ignore-filename-regex="\/.build\/" \
             -instr-profile=./.build/debug/codecov/default.profdata \
           > info.lcov

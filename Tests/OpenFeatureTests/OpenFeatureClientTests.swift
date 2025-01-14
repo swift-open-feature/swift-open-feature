@@ -12,6 +12,7 @@
 //===----------------------------------------------------------------------===//
 
 import OpenFeature
+import OpenFeatureTestSupport
 import Synchronization
 import Testing
 

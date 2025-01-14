@@ -13,43 +13,55 @@
 
 import OpenFeature
 
-struct OpenFeatureClosureHook: OpenFeatureHook {
-    typealias BeforeEvaluation = @Sendable (
+package struct OpenFeatureClosureHook: OpenFeatureHook {
+    package typealias BeforeEvaluation = @Sendable (
         _ context: inout OpenFeatureHookContext,
         _ hints: OpenFeatureHookHints
     ) throws -> Void
 
-    typealias AfterSuccessfulEvaluation = @Sendable (
+    package typealias AfterSuccessfulEvaluation = @Sendable (
         _ context: OpenFeatureHookContext,
         _ evaluation: AnyOpenFeatureEvaluation,
         _ hints: OpenFeatureHookHints
     ) throws -> Void
 
-    typealias OnError = @Sendable (
+    package typealias OnError = @Sendable (
         _ context: OpenFeatureHookContext,
         _ error: any Error,
         _ hints: OpenFeatureHookHints
     ) -> Void
 
-    typealias AfterEvaluation = @Sendable (
+    package typealias AfterEvaluation = @Sendable (
         _ context: OpenFeatureHookContext,
         _ evaluation: AnyOpenFeatureEvaluation,
         _ hints: OpenFeatureHookHints
     ) -> Void
 
-    var beforeEvaluation: BeforeEvaluation?
-    var afterSuccessfulEvaluation: AfterSuccessfulEvaluation?
-    var onError: OnError?
-    var afterEvaluation: AfterEvaluation?
+    package var beforeEvaluation: BeforeEvaluation?
+    package var afterSuccessfulEvaluation: AfterSuccessfulEvaluation?
+    package var onError: OnError?
+    package var afterEvaluation: AfterEvaluation?
 
-    func beforeEvaluation(
+    package init(
+        beforeEvaluation: BeforeEvaluation? = nil,
+        afterSuccessfulEvaluation: AfterSuccessfulEvaluation? = nil,
+        onError: OnError? = nil,
+        afterEvaluation: AfterEvaluation? = nil
+    ) {
+        self.beforeEvaluation = beforeEvaluation
+        self.afterSuccessfulEvaluation = afterSuccessfulEvaluation
+        self.onError = onError
+        self.afterEvaluation = afterEvaluation
+    }
+
+    package func beforeEvaluation(
         context: inout OpenFeatureHookContext,
         hints: [String: OpenFeatureFieldValue]
     ) throws {
         try beforeEvaluation?(&context, hints)
     }
 
-    func afterSuccessfulEvaluation(
+    package func afterSuccessfulEvaluation(
         context: OpenFeatureHookContext,
         evaluation: OpenFeatureEvaluation<some OpenFeatureValue>,
         hints: [String: OpenFeatureFieldValue]
@@ -57,11 +69,11 @@ struct OpenFeatureClosureHook: OpenFeatureHook {
         try afterSuccessfulEvaluation?(context, evaluation.eraseToAnyEvaluation(), hints)
     }
 
-    func onError(context: OpenFeatureHookContext, error: any Error, hints: OpenFeatureHookHints) {
+    package func onError(context: OpenFeatureHookContext, error: any Error, hints: OpenFeatureHookHints) {
         onError?(context, error, hints)
     }
 
-    func afterEvaluation(
+    package func afterEvaluation(
         context: OpenFeatureHookContext,
         evaluation: OpenFeatureEvaluation<some OpenFeatureValue>,
         hints: OpenFeatureHookHints
@@ -70,13 +82,13 @@ struct OpenFeatureClosureHook: OpenFeatureHook {
     }
 }
 
-struct AnyOpenFeatureEvaluation {
-    let flag: String
-    let value: any OpenFeatureValue
-    let error: OpenFeatureResolutionError?
-    let reason: OpenFeatureResolutionReason?
-    let variant: String?
-    let flagMetadata: [String: OpenFeatureFlagMetadataValue]
+package struct AnyOpenFeatureEvaluation {
+    package let flag: String
+    package let value: any OpenFeatureValue
+    package let error: OpenFeatureResolutionError?
+    package let reason: OpenFeatureResolutionReason?
+    package let variant: String?
+    package let flagMetadata: [String: OpenFeatureFlagMetadataValue]
 
     fileprivate init(_ evaluation: OpenFeatureEvaluation<some OpenFeatureValue>) {
         self.flag = evaluation.flag
@@ -89,7 +101,7 @@ struct AnyOpenFeatureEvaluation {
 }
 
 extension OpenFeatureEvaluation {
-    func eraseToAnyEvaluation() -> AnyOpenFeatureEvaluation {
+    fileprivate func eraseToAnyEvaluation() -> AnyOpenFeatureEvaluation {
         AnyOpenFeatureEvaluation(self)
     }
 }
