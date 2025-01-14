@@ -66,6 +66,42 @@ final class OpenFeatureTracingHookTests {
         )
     }
 
+    @Test("Does not add targeting key by default")
+    func withoutTargetingKeyByDefault() async throws {
+        let span = try await span(
+            evaluating: OpenFeatureResolution(value: true),
+            evaluationContext: OpenFeatureEvaluationContext(targetingKey: "secret")
+        )
+        let event = try #require(span.events.first)
+
+        #expect(event.name == "feature_flag")
+        #expect(
+            event.attributes == [
+                "feature_flag.key": "flag",
+                "feature_flag.provider_name": "static",
+            ]
+        )
+    }
+
+    @Test("Adds span event with targeting key if configured")
+    func withTargetingKeyWhenConfigured() async throws {
+        let span = try await span(
+            evaluating: OpenFeatureResolution(value: true),
+            hook: OpenFeatureTracingHook(recordTargetingKey: true),
+            evaluationContext: OpenFeatureEvaluationContext(targetingKey: "public")
+        )
+        let event = try #require(span.events.first)
+
+        #expect(event.name == "feature_flag")
+        #expect(
+            event.attributes == [
+                "feature_flag.key": "flag",
+                "feature_flag.provider_name": "static",
+                "feature_flag.context.id": "public",
+            ]
+        )
+    }
+
     @Test("No-op error without active span")
     func noOpErrorWithoutActiveSpan() async throws {
         let hook = OpenFeatureTracingHook()
@@ -119,7 +155,8 @@ final class OpenFeatureTracingHookTests {
 
     private func span(
         evaluating resolution: OpenFeatureResolution<Bool>,
-        hook: OpenFeatureTracingHook = OpenFeatureTracingHook()
+        hook: OpenFeatureTracingHook = OpenFeatureTracingHook(),
+        evaluationContext: OpenFeatureEvaluationContext? = nil
     ) async throws -> SingleSpanTracer.Span {
         let tracer = SingleSpanTracer()
         InstrumentationSystem.bootstrapInternal(tracer)
@@ -127,7 +164,7 @@ final class OpenFeatureTracingHookTests {
         let client = OpenFeatureClient(provider: { provider })
 
         await withSpan("test") { _ in
-            _ = await client.value(for: "flag", defaultingTo: false)
+            _ = await client.value(for: "flag", defaultingTo: false, context: evaluationContext)
         }
 
         return try #require(tracer.span)

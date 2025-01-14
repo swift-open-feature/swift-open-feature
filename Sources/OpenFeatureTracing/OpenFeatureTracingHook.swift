@@ -16,9 +16,14 @@ import Tracing
 
 public struct OpenFeatureTracingHook: OpenFeatureHook {
     private let setSpanStatusOnError: Bool
+    private let recordTargetingKey: Bool
 
-    public init(setSpanStatusOnError: Bool = false) {
+    public init(
+        setSpanStatusOnError: Bool = false,
+        recordTargetingKey: Bool = false
+    ) {
         self.setSpanStatusOnError = setSpanStatusOnError
+        self.recordTargetingKey = recordTargetingKey
     }
 
     public func afterSuccessfulEvaluation(
@@ -40,6 +45,10 @@ public struct OpenFeatureTracingHook: OpenFeatureHook {
 
         if let variant = evaluation.variant {
             eventAttributes["feature_flag.variant"] = variant
+        }
+
+        if recordTargetingKey, let targetingKey = context.evaluationContext.targetingKey {
+            eventAttributes["feature_flag.context.id"] = targetingKey
         }
 
         span.addEvent(SpanEvent(name: "feature_flag", attributes: eventAttributes))
@@ -66,6 +75,9 @@ public struct OpenFeatureTracingHook: OpenFeatureHook {
             eventAttributes["feature_flag.provider_name"] = providerMetadata.name
         }
 
+        if recordTargetingKey, let targetingKey = context.evaluationContext.targetingKey {
+            eventAttributes["feature_flag.context.id"] = targetingKey
+        }
         span.recordError(error, attributes: eventAttributes)
 
         if setSpanStatusOnError {
