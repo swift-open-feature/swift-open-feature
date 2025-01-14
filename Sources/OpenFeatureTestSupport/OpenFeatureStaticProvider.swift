@@ -14,22 +14,22 @@
 import OpenFeature
 import ServiceLifecycle
 
-struct OpenFeatureStaticProvider: OpenFeatureProvider {
-    let metadata = OpenFeatureProviderMetadata(name: "static")
-    let hooks: [any OpenFeatureHook]
+package struct OpenFeatureStaticProvider: OpenFeatureProvider {
+    package let metadata = OpenFeatureProviderMetadata(name: "static")
+    package let hooks: [any OpenFeatureHook]
 
     private let boolResolution: OpenFeatureResolution<Bool>
 
-    init(boolResolution: OpenFeatureResolution<Bool>, hooks: [any OpenFeatureHook] = []) {
+    package init(boolResolution: OpenFeatureResolution<Bool>, hooks: [any OpenFeatureHook] = []) {
         self.boolResolution = boolResolution
         self.hooks = hooks
     }
 
-    func run() async throws {
+    package func run() async throws {
         try await gracefulShutdown()
     }
 
-    func resolution(
+    package func resolution(
         of flag: String,
         defaultValue: Bool,
         context: OpenFeatureEvaluationContext?

@@ -14,20 +14,20 @@
 import OpenFeature
 import ServiceLifecycle
 
-actor OpenFeatureRecordingProvider: OpenFeatureProvider {
-    let metadata = OpenFeatureProviderMetadata(name: "recording")
-    let hooks: [any OpenFeatureHook]
-    var boolResolutionRequests = [ResolutionRequest<Bool>]()
+package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
+    package let metadata = OpenFeatureProviderMetadata(name: "recording")
+    package let hooks: [any OpenFeatureHook]
+    package var boolResolutionRequests = [ResolutionRequest<Bool>]()
 
-    init(hooks: [any OpenFeatureHook] = []) {
+    package init(hooks: [any OpenFeatureHook] = []) {
         self.hooks = hooks
     }
 
-    func run() async throws {
+    package func run() async throws {
         try await gracefulShutdown()
     }
 
-    func resolution(
+    package func resolution(
         of flag: String,
         defaultValue: Bool,
         context: OpenFeatureEvaluationContext?
@@ -37,9 +37,9 @@ actor OpenFeatureRecordingProvider: OpenFeatureProvider {
         return OpenFeatureResolution(value: defaultValue)
     }
 
-    struct ResolutionRequest<Value: Sendable> {
-        let flag: String
-        let defaultValue: Value
-        let context: OpenFeatureEvaluationContext?
+    package struct ResolutionRequest<Value: Sendable> {
+        package let flag: String
+        package let defaultValue: Value
+        package let context: OpenFeatureEvaluationContext?
     }
 }

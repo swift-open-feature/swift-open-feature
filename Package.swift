@@ -10,6 +10,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.0"),
         .package(url: "https://github.com/swift-server/swift-service-lifecycle.git", from: "2.0.0"),
+        .package(url: "https://github.com/apple/swift-distributed-tracing.git", from: "1.2.0"),
     ],
     targets: [
         .target(
@@ -22,8 +23,31 @@ let package = Package(
             name: "OpenFeatureTests",
             dependencies: [
                 .target(name: "OpenFeature"),
+                .target(name: "OpenFeatureTestSupport"),
                 .product(name: "Logging", package: "swift-log"),
                 .product(name: "ServiceLifecycle", package: "swift-service-lifecycle"),
+            ]
+        ),
+
+        .target(
+            name: "OpenFeatureTracing",
+            dependencies: [
+                .target(name: "OpenFeature"),
+                .product(name: "Tracing", package: "swift-distributed-tracing"),
+            ]
+        ),
+        .testTarget(
+            name: "OpenFeatureTracingTests",
+            dependencies: [
+                .target(name: "OpenFeatureTracing"),
+                .target(name: "OpenFeatureTestSupport"),
+            ]
+        ),
+
+        .target(
+            name: "OpenFeatureTestSupport",
+            dependencies: [
+                .target(name: "OpenFeature")
             ]
         ),
     ],
