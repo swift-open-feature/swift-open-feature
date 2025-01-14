@@ -100,8 +100,8 @@ package struct AnyOpenFeatureEvaluation {
     }
 }
 
-private extension OpenFeatureEvaluation {
-    func eraseToAnyEvaluation() -> AnyOpenFeatureEvaluation {
+extension OpenFeatureEvaluation {
+    fileprivate func eraseToAnyEvaluation() -> AnyOpenFeatureEvaluation {
         AnyOpenFeatureEvaluation(self)
     }
 }

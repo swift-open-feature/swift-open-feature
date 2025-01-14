@@ -191,7 +191,7 @@ final class OpenFeatureTracingHookTests {
                 "feature_flag.provider_name": "static",
                 "error.type": "flag_not_found",
                 "feature_flag.evaluation.error.message": #"Flag "flag" not found."#,
-                "feature_flag.context.id": "public"
+                "feature_flag.context.id": "public",
             ]
         )
         #expect(span.status == nil)
