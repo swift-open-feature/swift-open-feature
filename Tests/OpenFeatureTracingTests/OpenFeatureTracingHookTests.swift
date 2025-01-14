@@ -128,6 +128,7 @@ final class OpenFeatureTracingHookTests {
                 "feature_flag.key": "flag",
                 "feature_flag.provider_name": "static",
                 "error.type": "flag_not_found",
+                "feature_flag.evaluation.error.message": #"Flag "flag" not found."#
             ]
         )
         #expect(span.status == nil)
@@ -148,6 +149,7 @@ final class OpenFeatureTracingHookTests {
                 "feature_flag.key": "flag",
                 "feature_flag.provider_name": "static",
                 "error.type": "flag_not_found",
+                "feature_flag.evaluation.error.message": #"Flag "flag" not found."#
             ]
         )
         #expect(span.status == SpanStatus(code: .error, message: #"Error evaluating flag "flag" of type "Bool"."#))

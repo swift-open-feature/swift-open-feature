@@ -60,10 +60,13 @@ public struct OpenFeatureTracingHook: OpenFeatureHook {
         else { return }
 
         let errorType: String
+        let evaluationErrorMessage: String?
         if let error = error as? OpenFeatureResolutionError {
             errorType = error.code.rawValue.lowercased()
+            evaluationErrorMessage = error.message
         } else {
             errorType = "general"
+            evaluationErrorMessage = nil
         }
 
         var eventAttributes: SpanAttributes = [
@@ -78,6 +81,11 @@ public struct OpenFeatureTracingHook: OpenFeatureHook {
         if recordTargetingKey, let targetingKey = context.evaluationContext.targetingKey {
             eventAttributes["feature_flag.context.id"] = targetingKey
         }
+
+        if let evaluationErrorMessage {
+            eventAttributes["feature_flag.evaluation.error.message"] = evaluationErrorMessage
+        }
+
         span.recordError(error, attributes: eventAttributes)
 
         if setSpanStatusOnError {
