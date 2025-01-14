@@ -66,6 +66,21 @@ final class OpenFeatureTracingHookTests {
         )
     }
 
+    @Test("Adds span event with reason")
+    func withReason() async throws {
+        let span = try await span(evaluating: OpenFeatureResolution(value: true, reason: .targetingMatch))
+        let event = try #require(span.events.first)
+
+        #expect(event.name == "feature_flag")
+        #expect(
+            event.attributes == [
+                "feature_flag.key": "flag",
+                "feature_flag.provider_name": "static",
+                "feature_flag.evaluation.reason": "targeting_match",
+            ]
+        )
+    }
+
     @Test("Does not add targeting key by default")
     func withoutTargetingKeyByDefault() async throws {
         let span = try await span(

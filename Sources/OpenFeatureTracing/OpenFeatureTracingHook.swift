@@ -51,6 +51,10 @@ public struct OpenFeatureTracingHook: OpenFeatureHook {
             eventAttributes["feature_flag.context.id"] = targetingKey
         }
 
+        if let reason = evaluation.reason {
+            eventAttributes["feature_flag.evaluation.reason"] = reason.rawValue.lowercased()
+        }
+
         span.addEvent(SpanEvent(name: "feature_flag", attributes: eventAttributes))
     }
 
