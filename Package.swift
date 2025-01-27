@@ -5,7 +5,8 @@ let package = Package(
     name: "swift-open-feature",
     platforms: [.macOS(.v15)],
     products: [
-        .library(name: "OpenFeature", targets: ["OpenFeature"])
+        .library(name: "OpenFeature", targets: ["OpenFeature"]),
+        .library(name: "OpenFeatureTracing", targets: ["OpenFeatureTracing"]),
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.0"),
