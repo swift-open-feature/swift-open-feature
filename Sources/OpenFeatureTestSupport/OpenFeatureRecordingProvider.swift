@@ -17,17 +17,27 @@ import ServiceLifecycle
 package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
     package let metadata = OpenFeatureProviderMetadata(name: "recording")
     package let hooks: [any OpenFeatureHook]
+
     private var resolutionRequests = [ResolutionRequest<any OpenFeatureValue>]()
     package var boolResolutionRequests: [ResolutionRequest<Bool>] {
-        resolutionRequests.compactMap {
-            if let boolDefaultValue = $0.defaultValue as? Bool {
+        resolutionRequests.compactMap { resolutionRequest in
+            (resolutionRequest.defaultValue as? Bool).map { boolDefaultValue in
                 ResolutionRequest(
-                    flag: $0.flag,
+                    flag: resolutionRequest.flag,
                     defaultValue: boolDefaultValue,
-                    context: $0.context
+                    context: resolutionRequest.context
                 )
-            } else {
-                nil
+            }
+        }
+    }
+    package var stringResolutionRequests: [ResolutionRequest<String>] {
+        resolutionRequests.compactMap { resolutionRequest in
+            (resolutionRequest.defaultValue as? String).map { stringDefaultValue in
+                ResolutionRequest(
+                    flag: resolutionRequest.flag,
+                    defaultValue: stringDefaultValue,
+                    context: resolutionRequest.context
+                )
             }
         }
     }
@@ -58,15 +68,5 @@ package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
         package let flag: String
         package let defaultValue: Value
         package let context: OpenFeatureEvaluationContext?
-
-        func mapDefaultValue<NewValue>(
-            transform: (Value) -> NewValue
-        ) -> ResolutionRequest<NewValue> {
-            ResolutionRequest<NewValue>(
-                flag: flag,
-                defaultValue: transform(defaultValue),
-                context: context
-            )
-        }
     }
 }
