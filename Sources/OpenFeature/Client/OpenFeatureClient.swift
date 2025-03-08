@@ -34,6 +34,22 @@ public actor OpenFeatureClient: Sendable {
         ).value
     }
 
+    public func value(
+        for flag: String,
+        defaultingTo defaultValue: String,
+        context: OpenFeatureEvaluationContext? = nil,
+        hooks: [any OpenFeatureHook] = [],
+        hookHints: [String: OpenFeatureFieldValue] = [:]
+    ) async -> String {
+        await evaluation(
+            of: flag,
+            defaultingTo: defaultValue,
+            context: context,
+            hooks: hooks,
+            hookHints: hookHints
+        ).value
+    }
+
     public func evaluation(
         of flag: String,
         defaultingTo defaultValue: Bool,
@@ -41,6 +57,60 @@ public actor OpenFeatureClient: Sendable {
         hooks: [any OpenFeatureHook] = [],
         hookHints: [String: OpenFeatureFieldValue] = [:]
     ) async -> OpenFeatureEvaluation<Bool> {
+        await _evaluation(
+            of: flag,
+            defaultingTo: defaultValue,
+            context: context,
+            hooks: hooks,
+            hookHints: hookHints
+        )
+    }
+
+    public func evaluation(
+        of flag: String,
+        defaultingTo defaultValue: String,
+        context: OpenFeatureEvaluationContext? = nil,
+        hooks: [any OpenFeatureHook] = [],
+        hookHints: [String: OpenFeatureFieldValue] = [:]
+    ) async -> OpenFeatureEvaluation<String> {
+        await _evaluation(
+            of: flag,
+            defaultingTo: defaultValue,
+            context: context,
+            hooks: hooks,
+            hookHints: hookHints
+        )
+    }
+
+    public func setEvaluationContext(_ evaluationContext: OpenFeatureEvaluationContext?) {
+        self.evaluationContext = evaluationContext
+    }
+
+    public func addHooks(_ hooks: [any OpenFeatureHook]) {
+        self.hooks += hooks
+    }
+
+    package init(
+        provider: @escaping () -> any OpenFeatureProvider,
+        evaluationContext: OpenFeatureEvaluationContext? = nil,
+        hooks: [any OpenFeatureHook] = [],
+        globalEvaluationContext: @escaping () -> OpenFeatureEvaluationContext? = { nil },
+        globalHooks: @escaping () -> [any OpenFeatureHook] = { [] }
+    ) {
+        self.evaluationContext = evaluationContext
+        self.provider = provider
+        self.hooks = hooks
+        self.globalEvaluationContext = globalEvaluationContext
+        self.globalHooks = globalHooks
+    }
+
+    private func _evaluation<Value: OpenFeatureValue>(
+        of flag: String,
+        defaultingTo defaultValue: Value,
+        context: OpenFeatureEvaluationContext? = nil,
+        hooks: [any OpenFeatureHook] = [],
+        hookHints: [String: OpenFeatureFieldValue] = [:]
+    ) async -> OpenFeatureEvaluation<Value> {
         let provider = provider()
         let globalHooks = globalHooks()
         let context = mergedEvaluationContext(invocationContext: context)
@@ -119,28 +189,6 @@ public actor OpenFeatureClient: Sendable {
         }
 
         return evaluation
-    }
-
-    public func setEvaluationContext(_ evaluationContext: OpenFeatureEvaluationContext?) {
-        self.evaluationContext = evaluationContext
-    }
-
-    public func addHooks(_ hooks: [any OpenFeatureHook]) {
-        self.hooks += hooks
-    }
-
-    package init(
-        provider: @escaping () -> any OpenFeatureProvider,
-        evaluationContext: OpenFeatureEvaluationContext? = nil,
-        hooks: [any OpenFeatureHook] = [],
-        globalEvaluationContext: @escaping () -> OpenFeatureEvaluationContext? = { nil },
-        globalHooks: @escaping () -> [any OpenFeatureHook] = { [] }
-    ) {
-        self.evaluationContext = evaluationContext
-        self.provider = provider
-        self.hooks = hooks
-        self.globalEvaluationContext = globalEvaluationContext
-        self.globalHooks = globalHooks
     }
 
     private func mergedEvaluationContext(

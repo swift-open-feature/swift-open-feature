@@ -18,10 +18,16 @@ package struct OpenFeatureStaticProvider: OpenFeatureProvider {
     package let metadata = OpenFeatureProviderMetadata(name: "static")
     package let hooks: [any OpenFeatureHook]
 
-    private let boolResolution: OpenFeatureResolution<Bool>
+    private let boolResolution: OpenFeatureResolution<Bool>?
+    private let stringResolution: OpenFeatureResolution<String>?
 
-    package init(boolResolution: OpenFeatureResolution<Bool>, hooks: [any OpenFeatureHook] = []) {
+    package init(
+        boolResolution: OpenFeatureResolution<Bool>? = nil,
+        stringResolution: OpenFeatureResolution<String>? = nil,
+        hooks: [any OpenFeatureHook] = []
+    ) {
         self.boolResolution = boolResolution
+        self.stringResolution = stringResolution
         self.hooks = hooks
     }
 
@@ -29,11 +35,17 @@ package struct OpenFeatureStaticProvider: OpenFeatureProvider {
         try await gracefulShutdown()
     }
 
-    package func resolution(
+    package func resolution<Value: OpenFeatureValue>(
         of flag: String,
-        defaultValue: Bool,
+        defaultValue: Value,
         context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool> {
-        boolResolution
+    ) async -> OpenFeatureResolution<Value> {
+        if Value.self == Bool.self, let boolResolution {
+            boolResolution as! OpenFeatureResolution<Value>
+        } else if Value.self == String.self, let stringResolution {
+            stringResolution as! OpenFeatureResolution<Value>
+        } else {
+            fatalError("No resolution implemented for type \(Value.self).")
+        }
     }
 }

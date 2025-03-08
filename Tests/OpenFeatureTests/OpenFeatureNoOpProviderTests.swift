@@ -75,6 +75,13 @@ struct OpenFeatureNoOpProviderTests {
 
             #expect(resolution == .fromNoOpProvider(value: value))
         }
+
+        @Test("String uses default", arguments: ["foo", "bar"])
+        func string(_ value: String) async {
+            let resolution = await provider.resolution(of: "flag", defaultValue: value, context: nil)
+
+            #expect(resolution == .fromNoOpProvider(value: value))
+        }
     }
 }
 

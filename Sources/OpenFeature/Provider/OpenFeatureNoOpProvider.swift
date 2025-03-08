@@ -24,11 +24,11 @@ public struct OpenFeatureNoOpProvider: OpenFeatureProvider, CustomStringConverti
         try await gracefulShutdown()
     }
 
-    public func resolution(
+    public func resolution<Value: OpenFeatureValue>(
         of flag: String,
-        defaultValue: Bool,
+        defaultValue: Value,
         context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool> {
+    ) async -> OpenFeatureResolution<Value> {
         OpenFeatureResolution(value: defaultValue, reason: Self.noOpReason)
     }
 }

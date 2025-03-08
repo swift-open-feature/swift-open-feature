@@ -17,11 +17,11 @@ public protocol OpenFeatureProvider: Service {
     var metadata: OpenFeatureProviderMetadata { get }
     var hooks: [any OpenFeatureHook] { get }
 
-    func resolution(
+    func resolution<Value: OpenFeatureValue>(
         of flag: String,
-        defaultValue: Bool,
+        defaultValue: Value,
         context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool>
+    ) async -> OpenFeatureResolution<Value>
 }
 
 extension OpenFeatureProvider {

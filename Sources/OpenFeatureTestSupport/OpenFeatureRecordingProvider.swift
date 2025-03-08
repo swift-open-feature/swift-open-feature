@@ -17,7 +17,20 @@ import ServiceLifecycle
 package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
     package let metadata = OpenFeatureProviderMetadata(name: "recording")
     package let hooks: [any OpenFeatureHook]
-    package var boolResolutionRequests = [ResolutionRequest<Bool>]()
+    private var resolutionRequests = [ResolutionRequest<any OpenFeatureValue>]()
+    package var boolResolutionRequests: [ResolutionRequest<Bool>] {
+        resolutionRequests.compactMap {
+            if let boolDefaultValue = $0.defaultValue as? Bool {
+                ResolutionRequest(
+                    flag: $0.flag,
+                    defaultValue: boolDefaultValue,
+                    context: $0.context
+                )
+            } else {
+                nil
+            }
+        }
+    }
 
     package init(hooks: [any OpenFeatureHook] = []) {
         self.hooks = hooks
@@ -27,13 +40,17 @@ package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
         try await gracefulShutdown()
     }
 
-    package func resolution(
+    package func resolution<Value: OpenFeatureValue>(
         of flag: String,
-        defaultValue: Bool,
+        defaultValue: Value,
         context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool> {
-        let request = ResolutionRequest(flag: flag, defaultValue: defaultValue, context: context)
-        boolResolutionRequests.append(request)
+    ) async -> OpenFeatureResolution<Value> {
+        let request = ResolutionRequest<any OpenFeatureValue>(
+            flag: flag,
+            defaultValue: defaultValue,
+            context: context
+        )
+        resolutionRequests.append(request)
         return OpenFeatureResolution(value: defaultValue)
     }
 
@@ -41,5 +58,15 @@ package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
         package let flag: String
         package let defaultValue: Value
         package let context: OpenFeatureEvaluationContext?
+
+        func mapDefaultValue<NewValue>(
+            transform: (Value) -> NewValue
+        ) -> ResolutionRequest<NewValue> {
+            ResolutionRequest<NewValue>(
+                flag: flag,
+                defaultValue: transform(defaultValue),
+                context: context
+            )
+        }
     }
 }
