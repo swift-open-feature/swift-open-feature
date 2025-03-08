@@ -21,11 +21,11 @@ struct OpenFeatureDefaultValueProvider: OpenFeatureProvider {
         try await gracefulShutdown()
     }
 
-    func resolution(
+    func resolution<Value: OpenFeatureValue>(
         of flag: String,
-        defaultValue: Bool,
+        defaultValue: Value,
         context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Bool> {
+    ) async -> OpenFeatureResolution<Value> {
         OpenFeatureResolution(value: defaultValue)
     }
 }
