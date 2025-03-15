@@ -57,12 +57,15 @@ public actor OpenFeatureClient: Sendable {
         hooks: [any OpenFeatureHook] = [],
         hookHints: [String: OpenFeatureFieldValue] = [:]
     ) async -> OpenFeatureEvaluation<Bool> {
-        await _evaluation(
+        await evaluation(
             of: flag,
             defaultingTo: defaultValue,
             context: context,
             hooks: hooks,
-            hookHints: hookHints
+            hookHints: hookHints,
+            performResolution: { provider, flag, defaultValue, context in
+                await provider.resolution(of: flag, defaultValue: defaultValue, context: context)
+            }
         )
     }
 
@@ -73,12 +76,15 @@ public actor OpenFeatureClient: Sendable {
         hooks: [any OpenFeatureHook] = [],
         hookHints: [String: OpenFeatureFieldValue] = [:]
     ) async -> OpenFeatureEvaluation<String> {
-        await _evaluation(
+        await evaluation(
             of: flag,
             defaultingTo: defaultValue,
             context: context,
             hooks: hooks,
-            hookHints: hookHints
+            hookHints: hookHints,
+            performResolution: { provider, flag, defaultValue, context in
+                await provider.resolution(of: flag, defaultValue: defaultValue, context: context)
+            }
         )
     }
 
@@ -104,12 +110,18 @@ public actor OpenFeatureClient: Sendable {
         self.globalHooks = globalHooks
     }
 
-    private func _evaluation<Value: OpenFeatureValue>(
+    private func evaluation<Value>(
         of flag: String,
         defaultingTo defaultValue: Value,
-        context: OpenFeatureEvaluationContext? = nil,
-        hooks: [any OpenFeatureHook] = [],
-        hookHints: [String: OpenFeatureFieldValue] = [:]
+        context: OpenFeatureEvaluationContext?,
+        hooks: [any OpenFeatureHook],
+        hookHints: [String: OpenFeatureFieldValue],
+        performResolution: (
+            _ provider: any OpenFeatureProvider,
+            _ flag: String,
+            _ defaultValue: Value,
+            _ context: OpenFeatureEvaluationContext
+        ) async -> OpenFeatureResolution<Value>
     ) async -> OpenFeatureEvaluation<Value> {
         let provider = provider()
         let globalHooks = globalHooks()
@@ -151,10 +163,11 @@ public actor OpenFeatureClient: Sendable {
             }
         }
 
-        let resolution = await provider.resolution(
-            of: flag,
-            defaultValue: defaultValue,
-            context: hookContext.evaluationContext
+        let resolution = await performResolution(
+            provider,
+            flag,
+            defaultValue,
+            hookContext.evaluationContext
         )
         let evaluation = OpenFeatureEvaluation(flag: flag, resolution: resolution)
 

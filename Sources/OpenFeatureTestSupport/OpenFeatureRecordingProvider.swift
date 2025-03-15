@@ -18,29 +18,8 @@ package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
     package let metadata = OpenFeatureProviderMetadata(name: "recording")
     package let hooks: [any OpenFeatureHook]
 
-    private var resolutionRequests = [ResolutionRequest<any OpenFeatureValue>]()
-    package var boolResolutionRequests: [ResolutionRequest<Bool>] {
-        resolutionRequests.compactMap { resolutionRequest in
-            (resolutionRequest.defaultValue as? Bool).map { boolDefaultValue in
-                ResolutionRequest(
-                    flag: resolutionRequest.flag,
-                    defaultValue: boolDefaultValue,
-                    context: resolutionRequest.context
-                )
-            }
-        }
-    }
-    package var stringResolutionRequests: [ResolutionRequest<String>] {
-        resolutionRequests.compactMap { resolutionRequest in
-            (resolutionRequest.defaultValue as? String).map { stringDefaultValue in
-                ResolutionRequest(
-                    flag: resolutionRequest.flag,
-                    defaultValue: stringDefaultValue,
-                    context: resolutionRequest.context
-                )
-            }
-        }
-    }
+    package var boolResolutionRequests = [ResolutionRequest<Bool>]()
+    package var stringResolutionRequests = [ResolutionRequest<String>]()
 
     package init(hooks: [any OpenFeatureHook] = []) {
         self.hooks = hooks
@@ -50,17 +29,31 @@ package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
         try await gracefulShutdown()
     }
 
-    package func resolution<Value: OpenFeatureValue>(
+    package func resolution(
         of flag: String,
-        defaultValue: Value,
+        defaultValue: Bool,
         context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Value> {
-        let request = ResolutionRequest<any OpenFeatureValue>(
+    ) async -> OpenFeatureResolution<Bool> {
+        let request = ResolutionRequest(
             flag: flag,
             defaultValue: defaultValue,
             context: context
         )
-        resolutionRequests.append(request)
+        boolResolutionRequests.append(request)
+        return OpenFeatureResolution(value: defaultValue)
+    }
+
+    package func resolution(
+        of flag: String,
+        defaultValue: String,
+        context: OpenFeatureEvaluationContext?
+    ) async -> OpenFeatureResolution<String> {
+        let request = ResolutionRequest(
+            flag: flag,
+            defaultValue: defaultValue,
+            context: context
+        )
+        stringResolutionRequests.append(request)
         return OpenFeatureResolution(value: defaultValue)
     }
 
