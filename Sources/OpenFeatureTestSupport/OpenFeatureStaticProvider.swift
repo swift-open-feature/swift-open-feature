@@ -35,17 +35,19 @@ package struct OpenFeatureStaticProvider: OpenFeatureProvider {
         try await gracefulShutdown()
     }
 
-    package func resolution<Value: OpenFeatureValue>(
+    package func resolution(
         of flag: String,
-        defaultValue: Value,
-        context: OpenFeatureEvaluationContext?
-    ) async -> OpenFeatureResolution<Value> {
-        if Value.self == Bool.self, let boolResolution {
-            boolResolution as! OpenFeatureResolution<Value>
-        } else if Value.self == String.self, let stringResolution {
-            stringResolution as! OpenFeatureResolution<Value>
-        } else {
-            fatalError("No resolution implemented for type \(Value.self).")
-        }
+        defaultValue: Bool,
+        context: OpenFeature.OpenFeatureEvaluationContext?
+    ) async -> OpenFeature.OpenFeatureResolution<Bool> {
+        boolResolution!
+    }
+
+    package func resolution(
+        of flag: String,
+        defaultValue: String,
+        context: OpenFeature.OpenFeatureEvaluationContext?
+    ) async -> OpenFeature.OpenFeatureResolution<String> {
+        stringResolution!
     }
 }
