@@ -44,23 +44,23 @@ struct OpenFeatureClientTests {
     @Suite("String")
     struct StringTests {
         @Test("value", arguments: ["foo", "bar"])
-        func value(_ defaultValue: String) async {
-            let provider = OpenFeatureDefaultValueProvider()
+        func value(_ value: String) async {
+            let provider = OpenFeatureStaticProvider(stringResolution: OpenFeatureResolution(value: value))
             let client = OpenFeatureClient(provider: { provider })
 
-            let value = await client.value(for: "flag", defaultingTo: defaultValue)
+            let resolvedValue = await client.value(for: "flag", defaultingTo: "some-default-value")
 
-            #expect(value == defaultValue)
+            #expect(resolvedValue == value)
         }
 
         @Test("evaluation", arguments: ["foo", "bar"])
-        func evaluation(_ defaultValue: String) async {
-            let provider = OpenFeatureDefaultValueProvider()
+        func evaluation(_ value: String) async {
+            let provider = OpenFeatureStaticProvider(stringResolution: OpenFeatureResolution(value: value))
             let client = OpenFeatureClient(provider: { provider })
 
-            let evaluation = await client.evaluation(of: "flag", defaultingTo: defaultValue)
+            let evaluation = await client.evaluation(of: "flag", defaultingTo: "some-default-value")
 
-            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: defaultValue))
+            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: value))
         }
     }
 
