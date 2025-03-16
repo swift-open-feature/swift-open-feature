@@ -21,23 +21,23 @@ struct OpenFeatureClientTests {
     @Suite("Bool")
     struct BoolTests {
         @Test("value", arguments: [true, false])
-        func value(_ defaultValue: Bool) async {
-            let provider = OpenFeatureDefaultValueProvider()
+        func value(_ value: Bool) async {
+            let provider = OpenFeatureStaticProvider(boolResolution: OpenFeatureResolution(value: value))
             let client = OpenFeatureClient(provider: { provider })
 
-            let value = await client.value(for: "flag", defaultingTo: defaultValue)
+            let resolvedValue = await client.value(for: "flag", defaultingTo: !value)
 
-            #expect(value == defaultValue)
+            #expect(resolvedValue == value)
         }
 
         @Test("evaluation", arguments: [true, false])
-        func evaluation(_ defaultValue: Bool) async {
-            let provider = OpenFeatureDefaultValueProvider()
+        func evaluation(_ value: Bool) async {
+            let provider = OpenFeatureStaticProvider(boolResolution: OpenFeatureResolution(value: value))
             let client = OpenFeatureClient(provider: { provider })
 
-            let evaluation = await client.evaluation(of: "flag", defaultingTo: defaultValue)
+            let evaluation = await client.evaluation(of: "flag", defaultingTo: !value)
 
-            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: defaultValue))
+            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: value))
         }
     }
 
