@@ -20,14 +20,17 @@ package struct OpenFeatureStaticProvider: OpenFeatureProvider {
 
     private let boolResolution: OpenFeatureResolution<Bool>?
     private let stringResolution: OpenFeatureResolution<String>?
+    private let intResolution: OpenFeatureResolution<Int>?
 
     package init(
         boolResolution: OpenFeatureResolution<Bool>? = nil,
         stringResolution: OpenFeatureResolution<String>? = nil,
+        intResolution: OpenFeatureResolution<Int>? = nil,
         hooks: [any OpenFeatureHook] = []
     ) {
         self.boolResolution = boolResolution
         self.stringResolution = stringResolution
+        self.intResolution = intResolution
         self.hooks = hooks
     }
 
@@ -49,5 +52,13 @@ package struct OpenFeatureStaticProvider: OpenFeatureProvider {
         context: OpenFeature.OpenFeatureEvaluationContext?
     ) async -> OpenFeature.OpenFeatureResolution<String> {
         stringResolution!
+    }
+
+    package func resolution(
+        of flag: String,
+        defaultValue: Int,
+        context: OpenFeature.OpenFeatureEvaluationContext?
+    ) async -> OpenFeature.OpenFeatureResolution<Int> {
+        intResolution!
     }
 }

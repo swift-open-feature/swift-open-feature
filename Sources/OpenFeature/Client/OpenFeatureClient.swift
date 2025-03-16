@@ -50,6 +50,22 @@ public actor OpenFeatureClient: Sendable {
         ).value
     }
 
+    public func value(
+        for flag: String,
+        defaultingTo defaultValue: Int,
+        context: OpenFeatureEvaluationContext? = nil,
+        hooks: [any OpenFeatureHook] = [],
+        hookHints: [String: OpenFeatureFieldValue] = [:]
+    ) async -> Int {
+        await evaluation(
+            of: flag,
+            defaultingTo: defaultValue,
+            context: context,
+            hooks: hooks,
+            hookHints: hookHints
+        ).value
+    }
+
     public func evaluation(
         of flag: String,
         defaultingTo defaultValue: Bool,
@@ -76,6 +92,25 @@ public actor OpenFeatureClient: Sendable {
         hooks: [any OpenFeatureHook] = [],
         hookHints: [String: OpenFeatureFieldValue] = [:]
     ) async -> OpenFeatureEvaluation<String> {
+        await evaluation(
+            of: flag,
+            defaultingTo: defaultValue,
+            context: context,
+            hooks: hooks,
+            hookHints: hookHints,
+            performResolution: { provider, flag, defaultValue, context in
+                await provider.resolution(of: flag, defaultValue: defaultValue, context: context)
+            }
+        )
+    }
+
+    public func evaluation(
+        of flag: String,
+        defaultingTo defaultValue: Int,
+        context: OpenFeatureEvaluationContext? = nil,
+        hooks: [any OpenFeatureHook] = [],
+        hookHints: [String: OpenFeatureFieldValue] = [:]
+    ) async -> OpenFeatureEvaluation<Int> {
         await evaluation(
             of: flag,
             defaultingTo: defaultValue,

@@ -20,6 +20,7 @@ package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
 
     package var boolResolutionRequests = [ResolutionRequest<Bool>]()
     package var stringResolutionRequests = [ResolutionRequest<String>]()
+    package var intResolutionRequests = [ResolutionRequest<Int>]()
 
     package init(hooks: [any OpenFeatureHook] = []) {
         self.hooks = hooks
@@ -54,6 +55,20 @@ package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
             context: context
         )
         stringResolutionRequests.append(request)
+        return OpenFeatureResolution(value: defaultValue)
+    }
+
+    package func resolution(
+        of flag: String,
+        defaultValue: Int,
+        context: OpenFeatureEvaluationContext?
+    ) async -> OpenFeatureResolution<Int> {
+        let request = ResolutionRequest(
+            flag: flag,
+            defaultValue: defaultValue,
+            context: context
+        )
+        intResolutionRequests.append(request)
         return OpenFeatureResolution(value: defaultValue)
     }
 
