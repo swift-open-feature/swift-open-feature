@@ -66,47 +66,47 @@ struct OpenFeatureClientTests {
 
     @Suite("Int")
     struct IntTests {
-        @Test("value", arguments: [0, 42])
-        func value(_ defaultValue: Int) async {
-            let provider = OpenFeatureDefaultValueProvider()
+        @Test("value", arguments: [-42, 0, 42])
+        func value(_ value: Int) async {
+            let provider = OpenFeatureStaticProvider(intResolution: OpenFeatureResolution(value: value))
             let client = OpenFeatureClient(provider: { provider })
 
-            let value = await client.value(for: "flag", defaultingTo: defaultValue)
+            let resolvedValue = await client.value(for: "flag", defaultingTo: 1000)
 
-            #expect(value == defaultValue)
+            #expect(resolvedValue == value)
         }
 
-        @Test("evaluation", arguments: [0, 42])
-        func evaluation(_ defaultValue: Int) async {
-            let provider = OpenFeatureDefaultValueProvider()
+        @Test("evaluation", arguments: [-42, 0, 42])
+        func evaluation(_ value: Int) async {
+            let provider = OpenFeatureStaticProvider(intResolution: OpenFeatureResolution(value: value))
             let client = OpenFeatureClient(provider: { provider })
 
-            let evaluation = await client.evaluation(of: "flag", defaultingTo: defaultValue)
+            let evaluation = await client.evaluation(of: "flag", defaultingTo: 1000)
 
-            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: defaultValue))
+            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: value))
         }
     }
 
     @Suite("Double")
     struct DoubleTests {
-        @Test("value", arguments: [-10.0, 123.45])
-        func value(_ defaultValue: Double) async {
-            let provider = OpenFeatureDefaultValueProvider()
+        @Test("value", arguments: [-4.2, 0.0, 4.2])
+        func value(_ value: Double) async {
+            let provider = OpenFeatureStaticProvider(doubleResolution: OpenFeatureResolution(value: value))
             let client = OpenFeatureClient(provider: { provider })
 
-            let value = await client.value(for: "flag", defaultingTo: defaultValue)
+            let resolvedValue = await client.value(for: "flag", defaultingTo: 1000.0)
 
-            #expect(value == defaultValue)
+            #expect(resolvedValue == value)
         }
 
-        @Test("evaluation", arguments: [-10.0, 123.45])
-        func evaluation(_ defaultValue: Double) async {
-            let provider = OpenFeatureDefaultValueProvider()
+        @Test("evaluation", arguments: [-4.2, 0.0, 4.2])
+        func evaluation(_ value: Double) async {
+            let provider = OpenFeatureStaticProvider(doubleResolution: OpenFeatureResolution(value: value))
             let client = OpenFeatureClient(provider: { provider })
 
-            let evaluation = await client.evaluation(of: "flag", defaultingTo: defaultValue)
+            let evaluation = await client.evaluation(of: "flag", defaultingTo: 1000.0)
 
-            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: defaultValue))
+            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: value))
         }
     }
 
