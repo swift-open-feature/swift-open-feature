@@ -64,6 +64,29 @@ struct OpenFeatureClientTests {
         }
     }
 
+    @Suite("Int")
+    struct IntTests {
+        @Test("value", arguments: [0, 42])
+        func value(_ defaultValue: Int) async {
+            let provider = OpenFeatureDefaultValueProvider()
+            let client = OpenFeatureClient(provider: { provider })
+
+            let value = await client.value(for: "flag", defaultingTo: defaultValue)
+
+            #expect(value == defaultValue)
+        }
+
+        @Test("evaluation", arguments: [0, 42])
+        func evaluation(_ defaultValue: Int) async {
+            let provider = OpenFeatureDefaultValueProvider()
+            let client = OpenFeatureClient(provider: { provider })
+
+            let evaluation = await client.evaluation(of: "flag", defaultingTo: defaultValue)
+
+            #expect(evaluation == OpenFeatureEvaluation(flag: "flag", value: defaultValue))
+        }
+    }
+
     @Suite("Evaluation Context Merging")
     struct EvaluationContextMergingTests {
         @Test("Starts with global")

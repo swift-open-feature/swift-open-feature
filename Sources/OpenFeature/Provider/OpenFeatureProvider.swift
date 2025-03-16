@@ -28,6 +28,12 @@ public protocol OpenFeatureProvider: Service {
         defaultValue: String,
         context: OpenFeatureEvaluationContext?
     ) async -> OpenFeatureResolution<String>
+
+    func resolution(
+        of flag: String,
+        defaultValue: Int,
+        context: OpenFeatureEvaluationContext?
+    ) async -> OpenFeatureResolution<Int>
 }
 
 extension OpenFeatureProvider {
