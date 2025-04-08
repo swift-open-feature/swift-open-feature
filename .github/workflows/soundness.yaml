@@ -33,7 +33,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install Swift
-        uses: vapor/swiftly-action@v0.1
+        uses: vapor/swiftly-action@v0.2
         with:
           toolchain: latest
         env:
