@@ -23,7 +23,7 @@ jobs:
         env:
           SWIFTLY_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Checkout
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v5
       - name: Resolve Swift dependencies
         run: swift package resolve
       - name: Run Unit Tests
