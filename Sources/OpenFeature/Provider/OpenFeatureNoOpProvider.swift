@@ -11,7 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if ServiceLifecycleSupport
 import ServiceLifecycle
+#endif
 
 public struct OpenFeatureNoOpProvider: OpenFeatureProvider, CustomStringConvertible {
     public let description = "OpenFeatureNoOpProvider"
@@ -21,7 +23,9 @@ public struct OpenFeatureNoOpProvider: OpenFeatureProvider, CustomStringConverti
     public init() {}
 
     public func run() async throws {
+        #if ServiceLifecycleSupport
         try await gracefulShutdown()
+        #endif
     }
 
     public func resolution<Value: OpenFeatureValue>(

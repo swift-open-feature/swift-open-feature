@@ -12,7 +12,10 @@
 //===----------------------------------------------------------------------===//
 
 import OpenFeature
+
+#if ServiceLifecycleSupport
 import ServiceLifecycle
+#endif
 
 package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
     package let metadata = OpenFeatureProviderMetadata(name: "recording")
@@ -28,7 +31,9 @@ package actor OpenFeatureRecordingProvider: OpenFeatureProvider {
     }
 
     package func run() async throws {
+        #if ServiceLifecycleSupport
         try await gracefulShutdown()
+        #endif
     }
 
     package func resolution(

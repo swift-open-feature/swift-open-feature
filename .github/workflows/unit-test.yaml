@@ -14,7 +14,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        toolchain: [latest]
+        toolchain: [latest, main-snapshot]
     steps:
       - name: Install Swift
         uses: vapor/swiftly-action@v0.2
@@ -27,7 +27,7 @@ jobs:
       - name: Resolve Swift dependencies
         run: swift package resolve
       - name: Run Unit Tests
-        run: swift test --parallel --enable-code-coverage
+        run: swift test --parallel --enable-code-coverage --enable-all-traits
       - name: Merge code coverage
         run: |
           llvm-cov export -format "lcov" \

@@ -12,7 +12,10 @@
 //===----------------------------------------------------------------------===//
 
 import OpenFeature
+
+#if ServiceLifecycleSupport
 import ServiceLifecycle
+#endif
 
 package struct OpenFeatureStaticProvider: OpenFeatureProvider {
     package let metadata = OpenFeatureProviderMetadata(name: "static")
@@ -38,7 +41,9 @@ package struct OpenFeatureStaticProvider: OpenFeatureProvider {
     }
 
     package func run() async throws {
+        #if ServiceLifecycleSupport
         try await gracefulShutdown()
+        #endif
     }
 
     package func resolution(

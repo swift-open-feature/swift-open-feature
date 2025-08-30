@@ -11,9 +11,14 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if ServiceLifecycleSupport
 import ServiceLifecycle
+public typealias _OpenFeatureProviderBaseProtocol = Service
+#else
+public typealias _OpenFeatureProviderBaseProtocol = Sendable
+#endif
 
-public protocol OpenFeatureProvider: Service {
+public protocol OpenFeatureProvider: _OpenFeatureProviderBaseProtocol {
     var metadata: OpenFeatureProviderMetadata { get }
     var hooks: [any OpenFeatureHook] { get }
 
@@ -40,6 +45,8 @@ public protocol OpenFeatureProvider: Service {
         defaultValue: Double,
         context: OpenFeatureEvaluationContext?
     ) async -> OpenFeatureResolution<Double>
+
+    func run() async throws
 }
 
 extension OpenFeatureProvider {

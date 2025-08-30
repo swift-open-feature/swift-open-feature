@@ -11,6 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if Tracing
 import ServiceContextModule
 import Synchronization
 import Tracing
@@ -138,3 +139,4 @@ final class SingleSpanTracer: Tracer {
         func end(at instant: @autoclosure () -> some TracerInstant) {}
     }
 }
+#endif
