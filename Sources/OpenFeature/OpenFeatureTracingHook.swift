@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if Tracing
+#if DistributedTracingSupport
 import Tracing
 
 public struct OpenFeatureTracingHook: OpenFeatureHook {

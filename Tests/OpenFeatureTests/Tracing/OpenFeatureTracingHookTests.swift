@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if Tracing
+#if DistributedTracingSupport
 import OpenFeature
 import OpenFeatureTestSupport
 import Testing

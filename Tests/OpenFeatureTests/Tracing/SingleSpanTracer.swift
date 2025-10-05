@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if Tracing
+#if DistributedTracingSupport
 import ServiceContextModule
 import Synchronization
 import Tracing
