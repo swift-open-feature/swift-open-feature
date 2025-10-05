@@ -14,28 +14,32 @@
 import OpenFeature
 
 package struct OpenFeatureClosureHook: OpenFeatureHook {
-    package typealias BeforeEvaluation = @Sendable (
-        _ context: inout OpenFeatureHookContext,
-        _ hints: OpenFeatureHookHints
-    ) throws -> Void
+    package typealias BeforeEvaluation =
+        @Sendable (
+            _ context: inout OpenFeatureHookContext,
+            _ hints: OpenFeatureHookHints
+        ) throws -> Void
 
-    package typealias AfterSuccessfulEvaluation = @Sendable (
-        _ context: OpenFeatureHookContext,
-        _ evaluation: AnyOpenFeatureEvaluation,
-        _ hints: OpenFeatureHookHints
-    ) throws -> Void
+    package typealias AfterSuccessfulEvaluation =
+        @Sendable (
+            _ context: OpenFeatureHookContext,
+            _ evaluation: AnyOpenFeatureEvaluation,
+            _ hints: OpenFeatureHookHints
+        ) throws -> Void
 
-    package typealias OnError = @Sendable (
-        _ context: OpenFeatureHookContext,
-        _ error: any Error,
-        _ hints: OpenFeatureHookHints
-    ) -> Void
+    package typealias OnError =
+        @Sendable (
+            _ context: OpenFeatureHookContext,
+            _ error: any Error,
+            _ hints: OpenFeatureHookHints
+        ) -> Void
 
-    package typealias AfterEvaluation = @Sendable (
-        _ context: OpenFeatureHookContext,
-        _ evaluation: AnyOpenFeatureEvaluation,
-        _ hints: OpenFeatureHookHints
-    ) -> Void
+    package typealias AfterEvaluation =
+        @Sendable (
+            _ context: OpenFeatureHookContext,
+            _ evaluation: AnyOpenFeatureEvaluation,
+            _ hints: OpenFeatureHookHints
+        ) -> Void
 
     package var beforeEvaluation: BeforeEvaluation?
     package var afterSuccessfulEvaluation: AfterSuccessfulEvaluation?
