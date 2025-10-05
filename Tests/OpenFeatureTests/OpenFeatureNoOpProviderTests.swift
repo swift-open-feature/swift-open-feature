@@ -13,11 +13,15 @@
 
 import Logging
 import OpenFeature
-import ServiceLifecycle
 import Testing
+
+#if ServiceLifecycle
+import ServiceLifecycle
+#endif
 
 @Suite("OpenFeatureNoOpProvider")
 struct OpenFeatureNoOpProviderTests {
+    #if ServiceLifecycle
     @Test("Stops on graceful shutdown")
     func gracefulShutdown() async throws {
         let provider = OpenFeatureNoOpProvider()
@@ -60,6 +64,7 @@ struct OpenFeatureNoOpProviderTests {
             try await group.waitForAll()
         }
     }
+    #endif
 
     @Suite("Resolution")
     struct ResolutionTests {

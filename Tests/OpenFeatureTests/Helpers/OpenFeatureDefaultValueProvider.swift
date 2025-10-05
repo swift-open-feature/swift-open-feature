@@ -12,13 +12,18 @@
 //===----------------------------------------------------------------------===//
 
 import OpenFeature
+
+#if ServiceLifecycle
 import ServiceLifecycle
+#endif
 
 struct OpenFeatureDefaultValueProvider: OpenFeatureProvider {
     let metadata = OpenFeatureProviderMetadata(name: "default-value")
 
     func run() async throws {
+        #if ServiceLifecycle
         try await gracefulShutdown()
+        #endif
     }
 
     func resolution<Value: OpenFeatureValue>(

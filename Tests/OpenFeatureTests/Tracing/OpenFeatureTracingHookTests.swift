@@ -11,9 +11,9 @@
 //
 //===----------------------------------------------------------------------===//
 
+#if DistributedTracing
 import OpenFeature
 import OpenFeatureTestSupport
-import OpenFeatureTracing
 import Testing
 import Tracing
 
@@ -235,3 +235,4 @@ final class OpenFeatureTracingHookTests {
         return try #require(tracer.span)
     }
 }
+#endif
