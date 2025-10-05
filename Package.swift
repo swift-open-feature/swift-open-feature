@@ -8,8 +8,8 @@ let package = Package(
         .library(name: "OpenFeature", targets: ["OpenFeature"])
     ],
     traits: [
-        .trait(name: "ServiceLifecycleSupport"),
-        .trait(name: "DistributedTracingSupport"),
+        .trait(name: "ServiceLifecycle"),
+        .trait(name: "DistributedTracing"),
         .default(enabledTraits: []),
     ],
     dependencies: [
@@ -24,12 +24,12 @@ let package = Package(
                 .product(
                     name: "ServiceLifecycle",
                     package: "swift-service-lifecycle",
-                    condition: .when(traits: ["ServiceLifecycleSupport"])
+                    condition: .when(traits: ["ServiceLifecycle"])
                 ),
                 .product(
                     name: "Tracing",
                     package: "swift-distributed-tracing",
-                    condition: .when(traits: ["DistributedTracingSupport"])
+                    condition: .when(traits: ["DistributedTracing"])
                 ),
             ]
         ),
@@ -39,7 +39,11 @@ let package = Package(
                 .target(name: "OpenFeature"),
                 .target(name: "OpenFeatureTestSupport"),
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "ServiceLifecycle", package: "swift-service-lifecycle"),
+                .product(
+                    name: "ServiceLifecycle",
+                    package: "swift-service-lifecycle",
+                    condition: .when(traits: ["ServiceLifecycle"])
+                ),
             ]
         ),
 

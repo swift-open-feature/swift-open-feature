@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if ServiceLifecycleSupport
+#if ServiceLifecycle
 import ServiceLifecycle
 #endif
 
@@ -23,7 +23,7 @@ public struct OpenFeatureNoOpProvider: OpenFeatureProvider, CustomStringConverti
     public init() {}
 
     public func run() async throws {
-        #if ServiceLifecycleSupport
+        #if ServiceLifecycle
         try await gracefulShutdown()
         #endif
     }

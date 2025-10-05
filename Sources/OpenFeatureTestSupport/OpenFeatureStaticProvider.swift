@@ -13,7 +13,7 @@
 
 import OpenFeature
 
-#if ServiceLifecycleSupport
+#if ServiceLifecycle
 import ServiceLifecycle
 #endif
 
@@ -41,7 +41,7 @@ package struct OpenFeatureStaticProvider: OpenFeatureProvider {
     }
 
     package func run() async throws {
-        #if ServiceLifecycleSupport
+        #if ServiceLifecycle
         try await gracefulShutdown()
         #endif
     }

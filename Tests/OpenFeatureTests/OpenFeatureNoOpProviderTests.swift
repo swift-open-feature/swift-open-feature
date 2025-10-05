@@ -15,13 +15,13 @@ import Logging
 import OpenFeature
 import Testing
 
-#if ServiceLifecycleSupport
+#if ServiceLifecycle
 import ServiceLifecycle
 #endif
 
 @Suite("OpenFeatureNoOpProvider")
 struct OpenFeatureNoOpProviderTests {
-    #if ServiceLifecycleSupport
+    #if ServiceLifecycle
     @Test("Stops on graceful shutdown")
     func gracefulShutdown() async throws {
         let provider = OpenFeatureNoOpProvider()

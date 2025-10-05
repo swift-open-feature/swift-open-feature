@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#if ServiceLifecycleSupport
+#if ServiceLifecycle
 import ServiceLifecycle
 public typealias _OpenFeatureProviderBaseProtocol = Service
 #else
