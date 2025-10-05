@@ -8,8 +8,8 @@ let package = Package(
         .library(name: "OpenFeature", targets: ["OpenFeature"])
     ],
     traits: [
-        .trait(name: "ServiceLifecycle"),
-        .trait(name: "DistributedTracing"),
+        .trait(name: "ServiceLifecycle", description: "Adds integration with Swift Service Lifecycle."),
+        .trait(name: "DistributedTracing", description: "Adds integration with Swift Distributed Tracing."),
         .default(enabledTraits: []),
     ],
     dependencies: [
