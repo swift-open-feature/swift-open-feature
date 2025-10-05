@@ -13,8 +13,11 @@
 
 import OpenFeature
 import OpenFeatureTestSupport
-import ServiceLifecycle
 import Testing
+
+#if ServiceLifecycle
+import ServiceLifecycle
+#endif
 
 @Suite("OpenFeatureSystem", .serialized)
 final class OpenFeatureSystemTests {
